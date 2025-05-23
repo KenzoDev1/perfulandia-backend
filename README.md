@@ -13,10 +13,9 @@ Este repositorio contiene el desarrollo técnico del sistema basado en microserv
 
 ### Microservicios Desarrollados
 
-- `usuarioservice`: > 📝 Describir qué funcionalidades ofrece este microservicio.
-- `productoservice`: > 📝 Describir qué funcionalidades ofrece este microservicio.
-- `________service`: > 📝 Indicar el nombre y función del microservicio adicional implementado.
-- `________service`: > 📝 Indicar el nombre y función del microservicio adicional implementado.
+- `productservice`: > 📝 Microservicio dedicado a Insertar, Eliminar, Buscar y Listar productos.
+- `usuarioservice`: > 📝 Microservicio dedicado a Listar, Buscar, Insertar y Eliminar usuarios.
+- `carritoservice`: > 📝 .
 
 ## 🛠️ Tecnologías Utilizadas
 
@@ -35,11 +34,12 @@ Este repositorio contiene el desarrollo técnico del sistema basado en microserv
 
 > 📝 Indicar nombre completo y rol de cada integrante del equipo.
 
-| Nombre                  | Rol en el proyecto         | Servicio principal trabajado |
-|-------------------------|----------------------------|------------------------------|
-| Nombre del integrante 1 | (Ej: Backend - Usuarios)   | usuarioservice               |
-| Nombre del integrante 2 | (Ej: Backend - Productos)  | productoservice              |
-| Nombre del integrante 3 | (Ej:Repositorio)           | pedidoservice                |
+| Nombre                  | Rol en el proyecto         |
+|-------------------------|----------------------------|
+| Vicente Alarcón Gallardo| Documentación .README      |
+| Ignacio Bittner Navea   | Desarrollo de la API       |
+| Benjamin Martinez Oyarzo| Desarrollo de la API       |
+| Francisco Aránguiz Inostroza| Desarrollo Informe     |
 
 ## 📂 Estructura del Repositorio
 
