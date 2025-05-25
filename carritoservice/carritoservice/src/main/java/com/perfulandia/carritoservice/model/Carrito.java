@@ -25,5 +25,6 @@ public class Carrito {
     // orphanRemoval=true: Si un CarritoItem se desvincula de un Carrito, se elimina de la BD.
     // fetch = FetchType.LAZY: Los CarritoItems se cargan solo cuando se accede a ellos.
     @OneToMany(mappedBy = "carrito", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    private Set<CarritoItem> items = new HashSet<>();
+    private Set<CarritoItem> items = new HashSet<>(); //Es igual a una List pero sin duplicados y sin orden
+    //HashSet es la opcion mas comun y eficiente para escenarios con un Set<>
 }
