@@ -80,7 +80,7 @@ public class CarritoService {
      */
     private Producto obtenerDetallesProductoDesdeMS(Long productId) {
         try {
-            return restTemplate.getForObject("http://localhost:8082/api/productos/" + productId, Producto.class);
+            return restTemplate.getForObject("http//localhost:8082/api/productos/" + productId, Producto.class);
         } catch (Exception e) {
             throw new RuntimeException("No se pudo obtener el producto con ID " + productId + " desde ProductoService. Error: " + e.getMessage());
         }
