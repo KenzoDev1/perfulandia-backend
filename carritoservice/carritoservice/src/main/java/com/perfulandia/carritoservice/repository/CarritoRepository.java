@@ -1,9 +1,9 @@
 package com.perfulandia.carritoservice.repository;
 
-import com.perfulandia.carritoservice.model.*;
-//2 Importar JPA Repository para trabajar con CRUD
+import com.perfulandia.carritoservice.model.Carrito;
 import org.springframework.data.jpa.repository.JpaRepository;
-//Interfaz hereda de JPA y gestiona la entidad usuario con ID Long
-public interface CarritoRepository extends JpaRepository<Carrito, Long> {
 
+// Interfaz para operaciones CRUD básicas en la entidad Carrito
+public interface CarritoRepository extends JpaRepository<Carrito, Long> {
+    // Spring Data JPA ya proporciona los métodos findAll(), findById(), save(), deleteById(), etc.
 }
