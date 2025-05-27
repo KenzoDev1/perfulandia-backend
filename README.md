@@ -15,7 +15,7 @@ Este repositorio contiene el desarrollo técnico del sistema basado en microserv
 
 - `productservice`: > 📝 Microservicio dedicado a Insertar, Eliminar, Buscar y Listar productos.
 - `usuarioservice`: > 📝 Microservicio dedicado a Listar, Buscar, Insertar y Eliminar usuarios.
-- `carritoservice`: > 📝 .
+- `carritoservice`: > 📝 Microservicio dedicado a Listar, insertar y eliminar carritos.
 
 ## 🛠️ Tecnologías Utilizadas
 
@@ -41,8 +41,6 @@ Este repositorio contiene el desarrollo técnico del sistema basado en microserv
 
 ## 🧑‍💻 Integrantes del Equipo
 
-> 📝 Indicar nombre completo y rol de cada integrante del equipo.
-
 | Nombre                  | Rol en el proyecto         |
 |-------------------------|----------------------------|
 | Vicente Alarcón Gallardo| Documentación .README      |
@@ -52,15 +50,21 @@ Este repositorio contiene el desarrollo técnico del sistema basado en microserv
 
 ## 📂 Estructura del Repositorio
 
-> 📝 Explicar brevemente la organización de carpetas del repositorio (por ejemplo, cada carpeta corresponde a un microservicio separado con su propio `pom.xml`).
+> Cada microservicio se encuentro almacenado en su propio archivo. Además de contar con archivos generados por el mismo IntelliJ y otro archivo para almacenar assets para el `README.md`.  
+<br> 
+`.idea`: Archivo dedicado al almacenamiento de METADATOS, generados automaicamente por IntelliJ.  
+`carritoservice`, `productoservice`, `usuarioservice`: Microservicios.  
+`readme-assets`: archivo dedicado a almacenar imagenes para poder ser ocupadas dentro del `README.md`.  
+`README.md`: Documento con toda la información importante acerca del repositorio y los microservicios.
 
 ```
 
-📦 perfulandia-microservices
-├── usuarioservice
+📦 perfulandia-backend
+├── .idea
+├── carritoservice
 ├── productoservice
-├── pedidoservice (Ejemplo)
-├── notificacionservice (Ejemplo)
+├── readme-assets
+├── usuarioservice
 └── README.md
 
 ```
