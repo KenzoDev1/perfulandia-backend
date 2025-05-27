@@ -5,7 +5,7 @@ Este repositorio contiene el desarrollo técnico del sistema basado en microserv
 
 ## 📦 Descripción General del Proyecto
 
-> 📝 Explicar brevemente en qué consiste el sistema, qué problema resuelve y qué beneficios ofrece al reemplazar el antiguo sistema monolítico.
+> El sistema se encargara de entregar 3 tipos de microservicios, los cuales se dedicaran a realizar distintas operaciones, haciendo así que el sistema sea mucho mas rápido y eficiente. Con estos microservicios se busca reemplazar el sistema monolítico anterior el cual tenia problemas operacionales, administrativos y de mantención.
 
 ## 🧩 Arquitectura de Microservicios
 
@@ -13,9 +13,9 @@ Este repositorio contiene el desarrollo técnico del sistema basado en microserv
 
 ### Microservicios Desarrollados
 
-- `productservice`: > 📝 Microservicio dedicado a Insertar, Eliminar, Buscar y Listar productos.
+- `productservice`: > 📝 Microservicio dedicado a Listar, Buscar, Insertar, Eliminar y productos.
 - `usuarioservice`: > 📝 Microservicio dedicado a Listar, Buscar, Insertar y Eliminar usuarios.
-- `carritoservice`: > 📝 Microservicio dedicado a Listar, insertar y eliminar carritos.
+- `carritoservice`: > 📝 Microservicio dedicado a Listar, Buscar, Insertar.
 
 ## 🛠️ Tecnologías Utilizadas
 
