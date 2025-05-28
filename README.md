@@ -5,17 +5,21 @@ Este repositorio contiene el desarrollo técnico del sistema basado en microserv
 
 ## 📦 Descripción General del Proyecto
 
-> El sistema se encargara de entregar 3 tipos de microservicios, los cuales se dedicaran a realizar distintas operaciones, haciendo así que el sistema sea mucho mas rápido y eficiente. Con estos microservicios se busca reemplazar el sistema monolítico anterior el cual tenia problemas operacionales, administrativos y de mantención.
+El sistema se encargara de entregar 3 tipos de microservicios, los cuales se dedicaran a realizar distintas operaciones, haciendo así que el sistema sea mucho mas rápido y eficiente. Con estos microservicios se busca reemplazar el sistema monolítico anterior el cual tenia problemas operacionales, administrativos y de mantención.
 
 ## 🧩 Arquitectura de Microservicios
 
-> 📝 Describir cómo está estructurado el sistema en microservicios. Pueden incluir un diagrama y explicar brevemente la función de cada servicio.
+> ![DIAGRAMA DE SERVICIOS](readme-assets/MicroservicioDiagramas.drawio.png "Diagrama representativo de los microservicios.")
+
+- `productoservice`: > 📝 Microservicio dedicado a Listar, Buscar, Insertar, Eliminar y productos.
+- `usuarioservice`: > 📝 Microservicio dedicado a Listar, Buscar, Insertar y Eliminar usuarios.
+- `carritoservice`: > 📝 Microservicio dedicado a Listar, Buscar, Insertar.
 
 ### Microservicios Desarrollados
 
-- `productservice`: > 📝 Microservicio dedicado a Listar, Buscar, Insertar, Eliminar y productos.
-- `usuarioservice`: > 📝 Microservicio dedicado a Listar, Buscar, Insertar y Eliminar usuarios.
-- `carritoservice`: > 📝 Microservicio dedicado a Listar, Buscar, Insertar.
+- `productservice` 
+- `usuarioservice`
+- `carritoservice`
 
 ## 🛠️ Tecnologías Utilizadas
 
@@ -32,7 +36,53 @@ Este repositorio contiene el desarrollo técnico del sistema basado en microserv
 
 ## 🗄️ Configuración de Bases de Datos
 
-> 📝 Indicar qué motor de base de datos usaron, cómo configuraron la conexión (`application.properties`), y qué tablas y campos definieron para cada microservicio.
+El motor utilizado para la base de datos fue MySQL, esta base de datos fue configurada en el archivo `application.properties`, las tablas y las relaciones fueron creadas dentro de las mismas APIs.
+
+Sintaxis de `application.properties`:
+```
+Sintaxis para carritoservice:
+
+spring.application.name=carritoservice
+server.port=8083
+spring.datasource.url=jdbc:mysql://localhost:3306/perfulandia_carritos
+spring.datasource.username=root
+spring.datasource.password=
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.show-sql=true
+spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.MySQL8Dialect
+```
+
+```
+Sintaxis para productservice:
+
+spring.application.name=productservice
+
+server.port=8082
+
+spring.datasource.url=jdbc:mysql://localhost:3306/perfulandia_productos
+spring.datasource.username=root
+spring.datasource.password=
+
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.show-sql=true
+spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.MySQLDialect
+```
+
+```
+Sintaxis para usuarioservice:
+
+spring.application.name=usuarioservice
+
+server.port=8081
+
+spring.datasource.url=jdbc:mysql://localhost:3306/perfulandia_usuarios
+spring.datasource.username=root
+spring.datasource.password=
+
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.show-sql=true
+spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.MySQL8Dialect
+```
 
 ## 📮 Endpoints y Pruebas
 
@@ -50,7 +100,7 @@ Este repositorio contiene el desarrollo técnico del sistema basado en microserv
 
 ## 📂 Estructura del Repositorio
 
-> Cada microservicio se encuentro almacenado en su propio archivo. Además de contar con archivos generados por el mismo IntelliJ y otro archivo para almacenar assets para el `README.md`.  
+Cada microservicio se encuentro almacenado en su propio archivo. Además de contar con archivos generados por el mismo IntelliJ y otro archivo para almacenar assets para el `README.md`.  
 <br> 
 `.idea`: Archivo dedicado al almacenamiento de METADATOS, generados automaicamente por IntelliJ.  
 `carritoservice`, `productoservice`, `usuarioservice`: Microservicios.  
@@ -71,8 +121,9 @@ Este repositorio contiene el desarrollo técnico del sistema basado en microserv
 
 ## 👥 Colaboración en GitHub
 
-> Cada Integrante cuenta con su propia rama en la cual trabaja sus propios avances, y mejorando codigo u otro documentos de los demás.
-![Captura de pantalla](readme-assets/branch%20example.png "Captura de pantalla de las branch existentes del equipo.")
+Cada Integrante cuenta con su propia rama en la cual trabaja sus propios avances, y mejorando codigo u otro documentos de los demás.
+> ![Captura de pantalla](readme-assets/Ramas%20del%20equipo.png "Captura de pantalla de las branch existentes del equipo.")
+
 Descripcion de las Ramas:  
     - `Master`: Esta es la rama principal, en la cual se trabaja cuando queremos hacer un cambio rapido al repositorio.  
     <br>
@@ -95,7 +146,7 @@ Descripcion de las Ramas:
 
 ## 📈 Lecciones Aprendidas
 
-> 📝 Reflexionar brevemente sobre qué aprendieron durante el desarrollo del proyecto (técnico y en trabajo en equipo).
+Durante el desarrollo de este proyecto, nosotros aprendimos a trabajar en equipo. Aprendimos que es una buena practica ir documentando los avances dentro del archivo `README.md`, también el propio uso de este archivo. Tambien aprendimos sobre las conexiones de MySQL con Java, además de aprender a usar anotaciones y crear `Endpoints` para las `APIs`. Y finalmente también aprendimos al manejo de repositorios en `Github` y el trabajo dentro de `Ramas`.
 
 ---
 
