@@ -35,8 +35,8 @@ public class CarritoController {
                 .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
-    // Endpoint para crear un nuevo carrito para un usuario (POST /api/carritos/crear/{usuarioId})
-    @PostMapping("/crear/{usuarioId}")
+    // Endpoint para crear un nuevo carrito para un usuario (POST /api/carritos/{usuarioId})
+    @PostMapping("/{usuarioId}")
     public ResponseEntity<Carrito> crearCarritoParaUsuario(@PathVariable Long usuarioId) {
         Carrito nuevoCarrito = carritoService.crearNuevoCarrito(usuarioId); // Llama al servicio para crear
         return new ResponseEntity<>(nuevoCarrito, HttpStatus.CREATED); // Retorna el carrito creado con estado 201 CREATED
@@ -47,10 +47,11 @@ public class CarritoController {
     @PostMapping("/{carritoId}/items")
     public ResponseEntity<Carrito> agregarProductoAlCarrito(
             @PathVariable Long carritoId,
-            @RequestParam Long productoId, // Renombrado de 'productId' a 'productoId'
+            @RequestParam Long productoId,
             @RequestParam Integer cantidad) {
         try {
             Carrito carritoActualizado = carritoService.agregarProductoAlCarrito(carritoId, productoId, cantidad);
+            System.out.println(carritoActualizado);
             return new ResponseEntity<>(carritoActualizado, HttpStatus.OK); // Retorna el carrito actualizado
         } catch (RuntimeException e) {
             // Manejo de errores básico: si algo falla (carrito no encontrado, stock, etc.), devuelve 400 BAD_REQUEST
@@ -63,15 +64,11 @@ public class CarritoController {
     @DeleteMapping("/{carritoId}/items")
     public ResponseEntity<Carrito> eliminarProductoDelCarrito(
             @PathVariable Long carritoId,
-            @RequestParam Long productoId, // Renombrado de 'productId' a 'productoId'
+            @RequestParam Long productoId,
             @RequestParam Integer cantidad) {
-        try {
             Carrito carritoActualizado = carritoService.eliminarProductoDelCarrito(carritoId, productoId, cantidad);
             return new ResponseEntity<>(carritoActualizado, HttpStatus.OK); // Retorna el carrito actualizado
-        } catch (RuntimeException e) {
-            // Manejo de errores básico
-            return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
-        }
+
     }
 
     // Endpoint para eliminar completamente un producto del carrito (DELETE /api/carritos/{carritoId}/productos/{productoId})

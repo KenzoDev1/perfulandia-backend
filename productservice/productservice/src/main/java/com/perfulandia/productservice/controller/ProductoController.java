@@ -13,9 +13,6 @@ import org.springframework.web.client.RestTemplate;
 @RestController
 @RequestMapping("/api/productos")
 public class ProductoController {
-
-
-
     private final ProductoService servicio;
     private final RestTemplate restTemplate;
     public ProductoController(ProductoService servicio,  RestTemplate restTemplate){
