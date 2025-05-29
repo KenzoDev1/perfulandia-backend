@@ -16,7 +16,7 @@ public class Carrito {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "user_id", nullable = false)
+    @Column(name = "usuario_id", nullable = false)
     private Long usuarioId;
 
     // Relación OneToMany con CarritoItem: Un Carrito puede tener muchos CarritoItems

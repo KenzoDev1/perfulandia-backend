@@ -1,22 +1,16 @@
 package com.perfulandia.carritoservice.service;
 
-import com.perfulandia.carritoservice.model.Carrito;
-import com.perfulandia.carritoservice.model.CarritoItem;
-import com.perfulandia.carritoservice.model.Producto;
-import com.perfulandia.carritoservice.model.Usuario; // Importa la clase Usuario
-import com.perfulandia.carritoservice.repository.CarritoRepository;
-import com.perfulandia.carritoservice.repository.CarritoItemRepository;
+import com.perfulandia.carritoservice.model.*;
+import com.perfulandia.carritoservice.repository.*;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.client.HttpClientErrorException; // Importa para manejar errores HTTP
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @Service
 public class CarritoService {
@@ -32,22 +26,58 @@ public class CarritoService {
         this.restTemplate = restTemplate;
     }
 
+    // Listar todos los carritos
     public List<Carrito> listarTodosLosCarritos() {
         return carritoRepository.findAll();
     }
 
+    // Buscar carrito por id
     public Optional<Carrito> buscarCarritoPorId(Long id) {
         return carritoRepository.findById(id);
     }
 
-    @Transactional
-    public Carrito guardarCarrito(Carrito carrito) {
-        return carritoRepository.save(carrito);
-    }
+    /* "Guardar carrito" tuvo que crearse manualmente, en vez de utilizar su metodo
+    * CRUD de JpaRepository porque necesitaba verificar en el atributo usuarioId exista */
 
+    // Eliminar carrito
     @Transactional
     public void eliminarCarrito(Long id) {
         carritoRepository.deleteById(id);
+    }
+
+    /**
+     * Obtiene los detalles de un usuario desde el UsuarioService.
+     * Este es el nuevo método para validar el usuario.'
+     * @param usuarioId ID del usuario.
+     * @return Objeto Usuario (DTO) con sus detalles, o null si no existe.
+     * @throws RuntimeException si hay un error de comunicación con el UsuarioService.
+     */
+    private Optional<Usuario> obtenerDetallesUsuarioDesdeMS(Long usuarioId) {
+        try {
+            Usuario usuario = restTemplate.getForObject("http://localhost:8081/api/usuarios/" + usuarioId, Usuario.class);
+            return Optional.ofNullable(usuario);
+        } catch (HttpClientErrorException.NotFound e) {
+            return Optional.empty(); // Retorna null si el usuario no se encuentra (HTTP 404)
+        } catch (Exception e) {
+            throw new RuntimeException("No se pudo obtener el usuario con ID " + usuarioId + " desde UsuarioService. Error: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Obtiene los detalles de un producto desde el ProductoService.
+     * @param productoId ID del producto.
+     * @return Objeto Producto (DTO) con sus detalles actualizados.
+     * @throws RuntimeException si el producto no es encontrado.
+     */
+    private Optional<Producto> obtenerDetallesProductoDesdeMS(Long productoId) {
+        try {
+            Producto producto = restTemplate.getForObject("http://localhost:8082/api/productos/" + productoId, Producto.class);
+            return Optional.ofNullable(producto);
+        } catch (HttpClientErrorException.NotFound e) {
+            return Optional.empty(); // Retorna null si el producto no se encuentra (HTTP 404)
+        } catch (Exception e) {
+            throw new RuntimeException("No se pudo obtener el producto con ID " + productoId + " desde ProductoService. Error: " + e.getMessage());
+        }
     }
 
     /**
@@ -59,8 +89,8 @@ public class CarritoService {
     @Transactional
     public Carrito crearNuevoCarrito(Long usuarioId) {
         // 1. Validar que el usuario exista en el microservicio de usuarios
-        Usuario usuario = obtenerDetallesUsuarioDesdeMS(usuarioId); // Llama al nuevo método de validación
-        if (usuario == null) {
+        Optional<Usuario> usuario = obtenerDetallesUsuarioDesdeMS(usuarioId);
+        if (usuario.isEmpty()) {
             throw new RuntimeException("No se puede crear un carrito para el usuario con ID " + usuarioId + " porque no existe.");
         }
 
@@ -68,41 +98,6 @@ public class CarritoService {
         Carrito carrito = new Carrito();
         carrito.setUsuarioId(usuarioId);
         return carritoRepository.save(carrito);
-    }
-
-    /**
-     * Obtiene los detalles de un producto desde el ProductoService.
-     * @param productId ID del producto.
-     * @return Objeto Producto (DTO) con sus detalles actualizados.
-     * @throws RuntimeException si el producto no es encontrado.
-     */
-    private Producto obtenerDetallesProductoDesdeMS(Long productId) {
-        try {
-            // Asegúrate de que la URL sea correcta para tu ProductoService
-            return restTemplate.getForObject("http://localhost:8082/api/productos/" + productId, Producto.class);
-        } catch (HttpClientErrorException.NotFound e) {
-            return null; // Retorna null si el producto no se encuentra (HTTP 404)
-        } catch (Exception e) {
-            throw new RuntimeException("No se pudo obtener el producto con ID " + productId + " desde ProductoService. Error: " + e.getMessage());
-        }
-    }
-
-    /**
-     * Obtiene los detalles de un usuario desde el UsuarioService.
-     * Este es el nuevo método para validar el usuario.
-     * @param usuarioId ID del usuario.
-     * @return Objeto Usuario (DTO) con sus detalles, o null si no existe.
-     * @throws RuntimeException si hay un error de comunicación con el UsuarioService.
-     */
-    private Usuario obtenerDetallesUsuarioDesdeMS(Long usuarioId) {
-        try {
-            // Asegúrate de que la URL sea correcta para tu UsuarioService
-            return restTemplate.getForObject("http://localhost:8081/api/usuarios/" + usuarioId, Usuario.class);
-        } catch (HttpClientErrorException.NotFound e) {
-            return null; // Retorna null si el usuario no se encuentra (HTTP 404)
-        } catch (Exception e) {
-            throw new RuntimeException("No se pudo obtener el usuario con ID " + usuarioId + " desde UsuarioService. Error: " + e.getMessage());
-        }
     }
 
     /**
@@ -115,7 +110,7 @@ public class CarritoService {
      * @throws RuntimeException si el carrito o producto no se encuentran, o si el stock es insuficiente.
      */
     @Transactional
-    public Carrito agregarProductoAlCarrito(Long carritoId, Long productoId, Integer cantidad) {
+    public CarritoItem agregarProductoAlCarrito(Long carritoId, Long productoId, Integer cantidad) {
         Carrito carrito = carritoRepository.findById(carritoId)
                 .orElseThrow(() -> new RuntimeException("Carrito no encontrado con ID: " + carritoId));
 
@@ -124,33 +119,48 @@ public class CarritoService {
         }
 
         // Obtener detalles del producto para validar stock
-        Producto productoDetalles = obtenerDetallesProductoDesdeMS(productoId);
-        if (productoDetalles == null) {
+        Optional<Producto> productoOptional = obtenerDetallesProductoDesdeMS(productoId);
+        Producto productoDetalles = productoOptional.orElseThrow(() -> new RuntimeException("Producto no encontrado con ID: " + productoId));
+        if (productoOptional.isEmpty()) {
             throw new RuntimeException("Producto con ID " + productoId + " no encontrado en ProductoService.");
         }
 
+        //Verifica que la cantidad sea menor al stock del producto
         if (productoDetalles.getStock() < cantidad) {
             throw new RuntimeException("Stock insuficiente para el producto: " + productoDetalles.getNombre() + ". Stock disponible: " + productoDetalles.getStock());
         }
 
-        Optional<CarritoItem> existingItem = carrito.getItems().stream()
-                .filter(item -> item.getProductId().equals(productoId))
+        //.getItems: Obtiene todos los objetos de tipo carrito
+        //.stream: es la tuberia donde se procesaran ciertas restricciones antes de dar un resultado
+        //.filter(): es el filtro que se realizara en la tuberia, segun la restriccion dentro del parentesis
+        //.findFirst(): la funcion se detendra apenas encuentre el primer elemento
+        Optional<CarritoItem> CarritoItemOptional = carrito.getItems().stream()
+                .filter(item -> item.getProductoId().equals(productoId))
                 .findFirst();
 
-        if (existingItem.isPresent()) {
-            CarritoItem item = existingItem.get();
-            item.setCantidad(item.getCantidad() + cantidad);
-            carritoItemRepository.save(item);
+        CarritoItem carritoItemResultado;
+
+        if (CarritoItemOptional.isPresent()) {
+            CarritoItem carritoItem = CarritoItemOptional.get();
+            /*Se suma la cantidad ya que segun la regla de negocio si no agrega un
+            carritoItem, entonces se actualizara su cantidad, segun lo ingresado en
+            el parametro
+            */
+            carritoItem.setCantidad(cantidad);
+            carritoItemResultado = carritoItemRepository.save(carritoItem);
+            carrito.getItems().add(carritoItemResultado);
         } else {
-            CarritoItem nuevoItem = CarritoItem.builder()
-                    .productId(productoId)
+            CarritoItem carritoItem = CarritoItem.builder()
+                    .productoId(productoId)
                     .cantidad(cantidad)
                     .carrito(carrito)
                     .build();
-            carrito.getItems().add(nuevoItem);
-            carritoItemRepository.save(nuevoItem);
+            carrito.getItems().add(carritoItem);
+            carritoItemResultado = carritoItemRepository.save(carritoItem);
+            carrito.getItems().add(carritoItemResultado);
         }
-        return carritoRepository.save(carrito);
+
+        return carritoItemResultado;
     }
 
     @Transactional
@@ -163,7 +173,7 @@ public class CarritoService {
         }
 
         Optional<CarritoItem> existingItem = carrito.getItems().stream()
-                .filter(item -> item.getProductId().equals(productoId))
+                .filter(item -> item.getProductoId().equals(productoId))
                 .findFirst();
 
         if (existingItem.isPresent()) {
@@ -187,7 +197,7 @@ public class CarritoService {
                 .orElseThrow(() -> new RuntimeException("Carrito no encontrado con ID: " + carritoId));
 
         CarritoItem itemToRemove = carrito.getItems().stream()
-                .filter(item -> item.getProductId().equals(productId))
+                .filter(item -> item.getProductoId().equals(productId))
                 .findFirst()
                 .orElseThrow(() -> new RuntimeException("Producto con ID " + productId + " no encontrado en el carrito."));
 
