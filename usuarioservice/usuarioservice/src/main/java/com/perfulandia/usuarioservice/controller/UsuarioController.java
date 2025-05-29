@@ -11,7 +11,6 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/usuarios")
 public class UsuarioController {
-
     private final UsuarioService service;
     //Constructor para poder consumir la interfaz
     public UsuarioController(UsuarioService service){
@@ -37,7 +36,4 @@ public class UsuarioController {
     public void eliminar(@PathVariable long id){
         service.eliminar(id);
     }
-
-
-
 }

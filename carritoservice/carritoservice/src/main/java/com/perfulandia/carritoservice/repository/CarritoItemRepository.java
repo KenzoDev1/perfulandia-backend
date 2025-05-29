@@ -1,7 +1,7 @@
 package com.perfulandia.carritoservice.repository;
 
 import com.perfulandia.carritoservice.model.CarritoItem;
-import org.springframework.data.jpa.repository.JpaRepository; // Importación específica
+import org.springframework.data.jpa.repository.JpaRepository;
 
 // Interfaz para operaciones CRUD básicas en la entidad CarritoItem
 public interface CarritoItemRepository extends JpaRepository<CarritoItem, Long> {
