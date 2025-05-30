@@ -86,8 +86,64 @@ spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.MySQL8Dialect
 
 ## 📮 Endpoints y Pruebas
 
-> 📝 Especificar los principales endpoints disponibles por microservicio (CRUD y llamadas entre servicios).  
-> Incluir capturas o descripciones de pruebas realizadas con Postman (mínimo 3 por micro-servicio).
+### Endpoints API Carrito  
+• Listar todos los carritos (GET /api/carritos) 
+>![ENDPOINT API CARRITO](readme-assets/img_Endpoint_carritoservice/Endpoint_Listar_carritos.png)  
+
+• Buscar un carrito por ID (GET /api/carritos/{id})  
+>![ENDPOINT API CARRITO](readme-assets/img_Endpoint_carritoservice/Endpoint_Buscar_carritos.png)
+
+• Crear un nuevo carrito para un usuario (POST /api/carritos/{usuarioId})  
+>![ENDPOINT API CARRITO](readme-assets/img_Endpoint_carritoservice/Endpoint_Crear_carritos.png)
+
+• Agregar un producto al carrito (POST /api/carritos/{carritoId}/items)  
+>![ENDPOINT API CARRITO](readme-assets/img_Endpoint_carritoservice/Endpoint_Agregar_Producto_carrito.png)
+
+• Eliminar una cantidad especifica de un producto del carrito (DELETE
+/api/carritos/{carritoId}/items)  
+>![ENDPOINT API CARRITO](readme-assets/img_Endpoint_carritoservice/Endpoint_Eliminar_Producto_Especifico_Cantidad_carrito.png)
+
+• Eliminar completamente un producto del carrito (DELETE
+/api/carritos/{carritoId}/productos/{productoId})  
+>![ENDPOINT API CARRITO](readme-assets/img_Endpoint_carritoservice/Endpoint_Eliminar_Producto_Todo_carrito.png)  
+
+• Vaciar completamente un carrito (PUT /api/carritos/{carritoId}/vaciar)  
+>![ENDPOINT API CARRITO](readme-assets/img_Endpoint_carritoservice/Endpoint_Vaciar_carritos.png)  
+
+• Eliminar un carrito por completo por ID (DELETE /api/carritos/{id})  
+>![ENDPOINT API CARRITO](readme-assets/img_Endpoint_carritoservice/Endpoint_Eliminar_carritos.png)
+
+
+### Endpoints API Producto 
+• Listar todos los productos (GET /api/productos)  
+>![ENDPOINT API PRODUCTO](readme-assets/img_Endpoint_productservice/Endpoint_Listar_productos.png)   
+
+• Crear un nuevo producto (POST /api/productos)  
+>![ENDPOINT API PRODUCTO](readme-assets/img_Endpoint_productservice/Endpoint_Crear_producto.png)  
+
+• Buscar un producto por ID (GET /api/productos/{id})  
+>![ENDPOINT API PRODUCTO](readme-assets/img_Endpoint_productservice/Endpoint_Buscar_ID_producto.png)  
+
+• Eliminar un producto por ID (DELETE /api/productos/{id})  
+>![ENDPOINT API PRODUCTO](readme-assets/img_Endpoint_productservice/Endpoint_Eliminar_ID_producto.png)  
+  
+• Buscar un usuario por su ID (GET /api/productos/usuario/{id})  
+>![ENDPOINT API PRODUCTO](readme-assets/img_Endpoint_productservice/Endpoint_Buscar_Usuario_ID_productos.png)  
+
+
+### Endpoints API Usuario 
+• Listar todos los usuarios (GET /api/usuarios)  
+>![ENDPOINT API USUARIO](readme-assets/img_Endpoint_usuarioservice/Endpoint_Listar_usuarios.png)  
+
+• Crear un nuevo usuario (POST /api/usuarios)  
+>![ENDPOINT API USUARIO](readme-assets/img_Endpoint_usuarioservice/Endpoint_Crear_usuarios.png)  
+
+• Buscar un usuario por ID (GET /api/usuarios/{id})  
+>![ENDPOINT API USUARIO](readme-assets/img_Endpoint_usuarioservice/Endpoint_Buscar_ID_usuarios.png)  
+
+• Eliminar un usuario por ID (DELETE /api/usuarios/{id})  
+>![ENDPOINT API USUARIO](readme-assets/img_Endpoint_usuarioservice/Endpoint_Eliminar_ID_usuario.png)  
+
 
 ## 🧑‍💻 Integrantes del Equipo
 
