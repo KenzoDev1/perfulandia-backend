@@ -42,11 +42,11 @@ public class CarritoController {
     }
 
     // Endpoint para agregar un producto al carrito
-    @PostMapping("/{carritoId}/items/{productoId}/{cantidad}")
+    @PostMapping("/{carritoId}/items")
     public CarritoItem agregarProductoAlCarrito(
             @PathVariable Long carritoId,
-            @PathVariable Long productoId,
-            @PathVariable Integer cantidad) {
+            @RequestParam Long productoId,
+            @RequestParam Integer cantidad) {
             CarritoItem itemAgregado = carritoService.agregarProductoAlCarrito(carritoId, productoId, cantidad);
             return itemAgregado;
     }

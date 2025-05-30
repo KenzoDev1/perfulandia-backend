@@ -142,11 +142,7 @@ public class CarritoService {
 
         if (CarritoItemOptional.isPresent()) {
             CarritoItem carritoItem = CarritoItemOptional.get();
-            /*Se suma la cantidad ya que segun la regla de negocio si no agrega un
-            carritoItem, entonces se actualizara su cantidad, segun lo ingresado en
-            el parametro
-            */
-            carritoItem.setCantidad(cantidad);
+            carritoItem.setCantidad(carritoItem.getCantidad()+cantidad);
             carritoItemResultado = carritoItemRepository.save(carritoItem);
             carrito.getItems().add(carritoItemResultado);
         } else {
