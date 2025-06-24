@@ -56,8 +56,12 @@ public class CarritoService {
         try {
             Usuario usuario = restTemplate.getForObject("http://localhost:8081/api/usuarios/" + usuarioId, Usuario.class);
             return Optional.ofNullable(usuario);
-        } catch (HttpClientErrorException.NotFound e) {
-            return Optional.empty(); // Retorna null si el usuario no se encuentra (HTTP 404)
+        } catch (HttpClientErrorException e) {
+            // Verifica si el código de estado es 404 (Not Found)
+            if (e.getStatusCode().is4xxClientError()) {
+                return Optional.empty();
+            }
+            throw e;
         } catch (Exception e) {
             throw new RuntimeException("No se pudo obtener el usuario con ID " + usuarioId + " desde UsuarioService. Error: " + e.getMessage());
         }
@@ -70,14 +74,18 @@ public class CarritoService {
      * @throws RuntimeException si el producto no es encontrado.
      */
     private Optional<Producto> obtenerDetallesProductoDesdeMS(Long productoId) {
-        try {
-            Producto producto = restTemplate.getForObject("http://localhost:8082/api/productos/" + productoId, Producto.class);
-            return Optional.ofNullable(producto);
-        } catch (HttpClientErrorException.NotFound e) {
-            return Optional.empty(); // Retorna null si el producto no se encuentra (HTTP 404)
-        } catch (Exception e) {
-            throw new RuntimeException("No se pudo obtener el producto con ID " + productoId + " desde ProductoService. Error: " + e.getMessage());
-        }
+            try {
+                Producto producto = restTemplate.getForObject("http://localhost:8082/api/productos/" + productoId, Producto.class);
+                return Optional.ofNullable(producto);
+            } catch (HttpClientErrorException e) {
+                // Verifica si el código de estado es 404 (Not Found)
+                if (e.getStatusCode().is4xxClientError()) {
+                    return Optional.empty();
+                }
+                throw e;
+            } catch (Exception e) {
+                throw new RuntimeException("No se pudo obtener el producto con ID " + productoId + " desde ProductoService. Error: " + e.getMessage());
+            }
     }
 
     /**

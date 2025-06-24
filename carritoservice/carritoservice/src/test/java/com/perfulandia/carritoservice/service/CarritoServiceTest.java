@@ -109,7 +109,7 @@ public class CarritoServiceTest {
     }
 
     @Test
-    @DisplayName("Test 2 - Buscar carrito por id cuando carrito NO existe")
+    @DisplayName("Test 3 - Buscar carrito por id cuando carrito NO existe") // Excepcion!!
     void buscarCarritoPorIdNoExistente() {
         // Cuando (when(...)) se ocupe el metodo .findById(anyLong()),
         // retornara (.thenReturn(...)) el resultado definido en el parametro (Optional.empty())
@@ -176,7 +176,7 @@ public class CarritoServiceTest {
     }
 
     @Test
-    @DisplayName("Test 6 - Crear nuevo carrito cuando usuario NO existe")
+    @DisplayName("Test 6 - Crear nuevo carrito cuando usuario NO existe") // Excepcion!!
     void crearNuevoCarritoUsuarioNoExistente() {
         // Simular que el usuario NO existe (lanza excepcion 404 Not Found)
         when(restTemplate.getForObject("http://localhost:8081/api/usuarios/" + usuario.getId(), Usuario.class))
@@ -195,139 +195,154 @@ public class CarritoServiceTest {
             carritoService.crearNuevoCarrito(usuario.getId());
         });
 
+        // Se asegura que el la excepcion sea el mismo mensaje que esta en .contains()
         assertTrue(exception.getMessage().contains(
                 "No se puede crear un carrito para el usuario con ID " + usuario.getId() + " porque no existe."
                 ));
 
-
+        // Se asegura que que el metodo.getForObject()
+        // de restTemplate se invoco una sola vez y se mapeo como una clase Usuario
         verify(restTemplate, times(1)).getForObject(anyString(), eq(Usuario.class));
 
         //Se asegura que el metodo .save(any(Carrito.class) de carritoRepository nunca fue llamado
         verify(carritoRepository, never()).save(any(Carrito.class));
     }
 
+    /*
+    * Agrega producto al carrito, se escribio "cuando producto NO existe",
+    * porque segun la logica de negocio en el service, cuando producto ya existe
+    * se actualiza la cantidad segun la cantidad ingresada, por eso esta aclaracion
+    * */
     @Test
-    @DisplayName("Test 7 - Agregar producto al carrito ****")
-    void agregarProductoAlCarrito_deberiaAgregarNuevoItemCuandoNoExiste() {
-        // Simular el carrito existente
-        when(carritoRepository.findById(carrito.getId())).thenReturn(Optional.of(carrito)); //
+    @DisplayName("Test 7 - Agregar producto carrito cuando producto NO es existente")
+    void agregarProductoNoExistenteAlCarrito() {
 
-        // Simular que el producto existe y tiene stock suficiente
+        when(carritoRepository.findById(carrito.getId())).thenReturn(Optional.of(carrito));
+
         when(restTemplate.getForObject("http://localhost:8082/api/productos/" + producto.getId(), Producto.class))
-                .thenReturn(producto); //
+                .thenReturn(producto);
 
-        // Simular el guardado del nuevo item
-        when(carritoItemRepository.save(any(CarritoItem.class))).thenReturn(carritoItem); //
+        when(carritoItemRepository.save(any(CarritoItem.class))).thenReturn(carritoItem);
 
-        CarritoItem resultItem = carritoService.agregarProductoAlCarrito(carrito.getId(), producto.getId(), 2); //
+        CarritoItem resultItem = carritoService.agregarProductoAlCarrito(carrito.getId(), producto.getId(), 2);
 
-        assertNotNull(resultItem); //
-        assertEquals(producto.getId(), resultItem.getProductoId()); //
-        assertEquals(2, resultItem.getCantidad()); //
-        verify(carritoRepository, times(1)).findById(carrito.getId()); //
-        verify(restTemplate, times(1)).getForObject(anyString(), eq(Producto.class)); //
-        verify(carritoItemRepository, times(1)).save(any(CarritoItem.class)); //
+        assertNotNull(resultItem);
+
+        assertEquals(producto.getId(), resultItem.getProductoId());
+
+        assertEquals(2, resultItem.getCantidad());
+
+        verify(carritoRepository, times(1)).findById(carrito.getId());
+        verify(restTemplate, times(1)).getForObject(anyString(), eq(Producto.class));
+        verify(carritoItemRepository, times(1)).save(any(CarritoItem.class));
     }
 
+    /*
+        Desde aqui decidi no poner comentarios ya que desde aqui, para no generar codigo boilerplate (repetitivo),
+        se repite la misma estructura :
+        1.- Preparacion 2.- Ejecucion y 3.- Asercion
+     */
+
+
     @Test
-    void agregarProductoAlCarrito_deberiaActualizarCantidadCuandoItemYaExiste() {
-        // Agregar el carritoItem inicial al carrito
-        carrito.getItems().add(carritoItem); //
+    @DisplayName("Test 8 - Actualizar cantidad del producto porque existe")
+    void agregarProductoExistenteAlCarritoActualizarCantidad() {
 
-        // Simular el carrito existente
-        when(carritoRepository.findById(carrito.getId())).thenReturn(Optional.of(carrito)); //
+        carrito.getItems().add(carritoItem);
 
-        // Simular que el producto existe y tiene stock suficiente
+        when(carritoRepository.findById(carrito.getId())).thenReturn(Optional.of(carrito));
+
         when(restTemplate.getForObject("http://localhost:8082/api/productos/" + producto.getId(), Producto.class))
-                .thenReturn(producto); //
+                .thenReturn(producto);
 
-        // Simular el guardado del item actualizado
-        when(carritoItemRepository.save(any(CarritoItem.class))).thenReturn(carritoItem); //
+        when(carritoItemRepository.save(any(CarritoItem.class))).thenReturn(carritoItem);
 
-        CarritoItem resultItem = carritoService.agregarProductoAlCarrito(carrito.getId(), producto.getId(), 3); //
+        CarritoItem resultItem = carritoService.agregarProductoAlCarrito(carrito.getId(), producto.getId(), 3);
 
-        assertNotNull(resultItem); //
-        assertEquals(producto.getId(), resultItem.getProductoId()); //
+        assertNotNull(resultItem);
+        assertEquals(producto.getId(), resultItem.getProductoId());
         assertEquals(5, resultItem.getCantidad()); // Cantidad inicial (2) + nueva cantidad (3) = 5
-        verify(carritoRepository, times(1)).findById(carrito.getId()); //
-        verify(restTemplate, times(1)).getForObject(anyString(), eq(Producto.class)); //
-        verify(carritoItemRepository, times(1)).save(any(CarritoItem.class)); //
+        verify(carritoRepository, times(1)).findById(carrito.getId());
+        verify(restTemplate, times(1)).getForObject(anyString(), eq(Producto.class));
+        verify(carritoItemRepository, times(1)).save(any(CarritoItem.class));
     }
 
     @Test
-    void agregarProductoAlCarrito_deberiaLanzarExcepcionSiCarritoNoEncontrado() {
-        when(carritoRepository.findById(anyLong())).thenReturn(Optional.empty()); //
+    @DisplayName("Test 9 - Agregar producto al carrito NO existente") // Excepcion!!
+    void agregarProductoAlCarritoNoExistente() {
+        when(carritoRepository.findById(anyLong())).thenReturn(Optional.empty());
 
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> { //
-            carritoService.agregarProductoAlCarrito(99L, producto.getId(), 1); //
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
+            carritoService.agregarProductoAlCarrito(99L, producto.getId(), 1);
         });
 
-        assertTrue(exception.getMessage().contains("Carrito no encontrado")); //
-        verify(carritoRepository, times(1)).findById(anyLong()); //
-        verify(restTemplate, never()).getForObject(anyString(), any(Class.class)); //
-        verify(carritoItemRepository, never()).save(any(CarritoItem.class)); //
+        assertTrue(exception.getMessage().contains("Carrito no encontrado"));
+        verify(carritoRepository, times(1)).findById(anyLong());
+        verify(restTemplate, never()).getForObject(anyString(), any(Class.class));
+        verify(carritoItemRepository, never()).save(any(CarritoItem.class));
     }
 
     @Test
-    void agregarProductoAlCarrito_deberiaLanzarExcepcionSiProductoNoEncontrado() {
-        when(carritoRepository.findById(carrito.getId())).thenReturn(Optional.of(carrito)); //
+    @DisplayName("Test 10 - Agregar producto al carrito cuando producto NO existe")
+    void agregarProductoAlCarritoCuandoProductoNoExiste() {
+        when(carritoRepository.findById(carrito.getId())).thenReturn(Optional.of(carrito));
         when(restTemplate.getForObject("http://localhost:8082/api/productos/" + producto.getId(), Producto.class))
-                .thenThrow(new HttpClientErrorException(HttpStatus.NOT_FOUND)); // Simular que el producto no existe
+                .thenThrow(new HttpClientErrorException(HttpStatus.NOT_FOUND));
 
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> { //
-            carritoService.agregarProductoAlCarrito(carrito.getId(), producto.getId(), 1); //
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
+            carritoService.agregarProductoAlCarrito(carrito.getId(), producto.getId(), 1);
         });
 
-        assertTrue(exception.getMessage().contains("Producto con ID " + producto.getId() + " no encontrado en ProductoService.")); //
-        verify(carritoRepository, times(1)).findById(carrito.getId()); //
-        verify(restTemplate, times(1)).getForObject(anyString(), eq(Producto.class)); //
-        verify(carritoItemRepository, never()).save(any(CarritoItem.class)); //
+        assertTrue(exception.getMessage().contains("Producto con ID " + producto.getId() + " no encontrado en ProductoService."));
+        verify(carritoRepository, times(1)).findById(carrito.getId());
+        verify(restTemplate, times(1)).getForObject(anyString(), eq(Producto.class));
+        verify(carritoItemRepository, never()).save(any(CarritoItem.class));
     }
 
     @Test
     void agregarProductoAlCarrito_deberiaLanzarExcepcionSiStockInsuficiente() {
         // Simular que el producto tiene menos stock que la cantidad solicitada
-        producto.setStock(1); //
-        when(carritoRepository.findById(carrito.getId())).thenReturn(Optional.of(carrito)); //
+        producto.setStock(1);
+        when(carritoRepository.findById(carrito.getId())).thenReturn(Optional.of(carrito));
         when(restTemplate.getForObject("http://localhost:8082/api/productos/" + producto.getId(), Producto.class))
-                .thenReturn(producto); //
+                .thenReturn(producto);
 
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> { //
-            carritoService.agregarProductoAlCarrito(carrito.getId(), producto.getId(), 2); // Cantidad > Stock
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
+            carritoService.agregarProductoAlCarrito(carrito.getId(), producto.getId(), 2);
         });
 
-        assertTrue(exception.getMessage().contains("Stock insuficiente")); //
-        verify(carritoRepository, times(1)).findById(carrito.getId()); //
-        verify(restTemplate, times(1)).getForObject(anyString(), eq(Producto.class)); //
-        verify(carritoItemRepository, never()).save(any(CarritoItem.class)); //
+        assertTrue(exception.getMessage().contains("Stock insuficiente"));
+        verify(carritoRepository, times(1)).findById(carrito.getId());
+        verify(restTemplate, times(1)).getForObject(anyString(), eq(Producto.class));
+        verify(carritoItemRepository, never()).save(any(CarritoItem.class));
     }
 
     @Test
     void eliminarProductoDelCarrito_deberiaEliminarItemCompletoSiCantidadEsMayorOIgual() {
-        carrito.getItems().add(carritoItem); //
-        when(carritoRepository.findById(carrito.getId())).thenReturn(Optional.of(carrito)); //
-        when(carritoRepository.save(any(Carrito.class))).thenReturn(carrito); //
+        carrito.getItems().add(carritoItem); // !!
+        when(carritoRepository.findById(carrito.getId())).thenReturn(Optional.of(carrito));
+        when(carritoRepository.save(any(Carrito.class))).thenReturn(carrito);
 
-        Carrito resultCarrito = carritoService.eliminarProductoDelCarrito(carrito.getId(), producto.getId(), 2); // Eliminar la cantidad completa o más
+        Carrito resultCarrito = carritoService.eliminarProductoDelCarrito(carrito.getId(), producto.getId(), 2);
 
-        assertNotNull(resultCarrito); //
-        assertTrue(resultCarrito.getItems().isEmpty()); // El item debería haber sido removido
-        verify(carritoRepository, times(1)).findById(carrito.getId()); //
-        verify(carritoItemRepository, times(1)).delete(carritoItem); // Se espera que se llame a delete sobre el item
-        verify(carritoRepository, times(1)).save(any(Carrito.class)); //
+        assertNotNull(resultCarrito);
+        assertTrue(resultCarrito.getItems().isEmpty());
+        verify(carritoRepository, times(1)).findById(carrito.getId());
+        verify(carritoItemRepository, times(1)).delete(carritoItem);
+        verify(carritoRepository, times(1)).save(any(Carrito.class));
     }
 
     @Test
     void eliminarProductoDelCarrito_deberiaReducirCantidadSiEsMenor() {
-        carrito.getItems().add(carritoItem); //
-        when(carritoRepository.findById(carrito.getId())).thenReturn(Optional.of(carrito)); //
-        when(carritoItemRepository.save(any(CarritoItem.class))).thenReturn(carritoItem); //
-        when(carritoRepository.save(any(Carrito.class))).thenReturn(carrito); //
+        carrito.getItems().add(carritoItem);
+        when(carritoRepository.findById(carrito.getId())).thenReturn(Optional.of(carrito));
+        when(carritoItemRepository.save(any(CarritoItem.class))).thenReturn(carritoItem);
+        when(carritoRepository.save(any(Carrito.class))).thenReturn(carrito);
 
-        Carrito resultCarrito = carritoService.eliminarProductoDelCarrito(carrito.getId(), producto.getId(), 1); // Eliminar 1 de 2
+        Carrito resultCarrito = carritoService.eliminarProductoDelCarrito(carrito.getId(), producto.getId(), 1);
 
-        assertNotNull(resultCarrito); //
-        assertEquals(1, resultCarrito.getItems().size()); // El item sigue ahí
+        assertNotNull(resultCarrito);
+        assertEquals(1, resultCarrito.getItems().size());
         assertTrue(resultCarrito.getItems().contains(carritoItem)); //
         assertEquals(1, carritoItem.getCantidad()); // La cantidad debería ser 1
         verify(carritoRepository, times(1)).findById(carrito.getId()); //
