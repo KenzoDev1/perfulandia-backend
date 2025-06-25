@@ -129,9 +129,6 @@ public class CarritoService {
         // Obtener detalles del producto para validar stock
         Optional<Producto> productoOptional = obtenerDetallesProductoDesdeMS(productoId);
         Producto productoDetalles = productoOptional.orElseThrow(() -> new RuntimeException("Producto no encontrado con ID: " + productoId));
-        if (productoOptional.isEmpty()) {
-            throw new RuntimeException("Producto con ID " + productoId + " no encontrado en ProductoService.");
-        }
 
         //Verifica que la cantidad sea menor al stock del producto
         if (productoDetalles.getStock() < cantidad) {
