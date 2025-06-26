@@ -24,6 +24,7 @@ public class CarritoItem {
     @Column(name = "producto_id", nullable = false)
     private Long productoId;
 
+    @EqualsAndHashCode.Exclude
     @Column(name = "cantidad", nullable = false)
     private Integer cantidad;
 }

@@ -4,6 +4,7 @@ import com.perfulandia.productservice.model.Producto;
 import com.perfulandia.productservice.repository.ProductoRepository;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -31,12 +32,13 @@ public class ProductoServiceTest {
 
     @BeforeEach
     void setUp() {
-        producto = new Producto(1L, "Perfume Prueba", 100.0, 50); //
+        producto = new Producto(1L, "Perfume Prueba", 100, 50);
     }
 
     @Test
-    void listar_deberiaRetornarTodosLosProductos() {
-        List<Producto> productos = Arrays.asList(producto, new Producto(2L, "Perfume B", 75.0, 30));
+    @DisplayName("Test 1 - Listar los productos")
+    void listarTodosLosProductos() {
+        List<Producto> productos = Arrays.asList(producto, new Producto(2L, "Perfume B", 75, 30));
         when(productoRepository.findAll()).thenReturn(productos);
 
         List<Producto> result = productoService.listar();
@@ -47,7 +49,8 @@ public class ProductoServiceTest {
     }
 
     @Test
-    void guardar_deberiaGuardarNuevoProducto() {
+    @DisplayName("Test 2 - Guardar nuevo producto")
+    void guardarNuevoProducto() {
         when(productoRepository.save(any(Producto.class))).thenReturn(producto);
 
         Producto result = productoService.guardar(producto);
@@ -58,7 +61,8 @@ public class ProductoServiceTest {
     }
 
     @Test
-    void bucarPorId_deberiaRetornarProductoCuandoExiste() {
+    @DisplayName("Test 3 - Buscar producto por id")
+    void bucarPorId() {
         when(productoRepository.findById(1L)).thenReturn(Optional.of(producto));
 
         Producto result = productoService.bucarPorId(1L);
@@ -69,7 +73,8 @@ public class ProductoServiceTest {
     }
 
     @Test
-    void bucarPorId_deberiaRetornarNullCuandoNoExiste() {
+    @DisplayName("Test 4 - Buscar producto por id, deberia retornar null cuando NO existe")
+    void bucarPorIdDeberiaRetornarNullCuandoNoExiste() {
         when(productoRepository.findById(anyLong())).thenReturn(Optional.empty());
 
         Producto result = productoService.bucarPorId(99L);
@@ -79,7 +84,8 @@ public class ProductoServiceTest {
     }
 
     @Test
-    void eliminar_deberiaEliminarProductoPorId() {
+    @DisplayName("Test 5 - Eliminar producto por id")
+    void eliminarProductoPorId() {
         doNothing().when(productoRepository).deleteById(1L); // Para métodos void
 
         productoService.eliminar(1L);
