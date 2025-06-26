@@ -338,7 +338,7 @@ public class CarritoServiceTest {
 
     @Test
     @DisplayName("Test 13 - Eliminar producto del carrito, deberia reducir la cantidad unicamente si la cantidad es menor")
-    void eliminarProductoDelCarrito_deberiaReducirCantidadSiEsMenor() { // Error
+    void eliminarProductoDelCarrito_deberiaReducirCantidadSiEsMenor() {
         carrito.getItems().add(carritoItem);
         when(carritoRepository.findById(carrito.getId())).thenReturn(Optional.of(carrito));
         when(carritoItemRepository.save(any(CarritoItem.class))).thenReturn(carritoItem);
@@ -375,7 +375,8 @@ public class CarritoServiceTest {
     @Test
     @DisplayName("Test 15 - Eliminar producto del carrito por completo, cuando el producto no fue encontrado")
     void eliminarProductoCompletoDelCarritoProductoNoEncontradoEnCarrito() {
-        when(carritoRepository.findById(carrito.getId())).thenReturn(Optional.of(carrito));
+        when
+                (carritoRepository.findById(carrito.getId())).thenReturn(Optional.of(carrito));
 
         RuntimeException exception = assertThrows(RuntimeException.class, () -> {
             carritoService.eliminarProductoCompletoDelCarrito(carrito.getId(), 999L);
@@ -410,14 +411,14 @@ public class CarritoServiceTest {
     @Test
     @DisplayName("Test 17 - Vaciar carrito, cuando el carrito no ha sido encontrado")
     void vaciarCarrito_deberiaLanzarExcepcionSiCarritoNoEncontrado() {
-        when(carritoRepository.findById(anyLong())).thenReturn(Optional.empty()); //
+        when(carritoRepository.findById(anyLong())).thenReturn(Optional.empty());
 
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> { //
-            carritoService.vaciarCarrito(99L); //
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
+            carritoService.vaciarCarrito(99L);
         });
 
-        assertTrue(exception.getMessage().contains("Carrito no encontrado con ID: 99")); //
-        verify(carritoRepository, times(1)).findById(anyLong()); //
-        verify(carritoRepository, never()).save(any(Carrito.class)); //
+        assertTrue(exception.getMessage().contains("Carrito no encontrado con ID: 99"));
+        verify(carritoRepository, times(1)).findById(anyLong());
+        verify(carritoRepository, never()).save(any(Carrito.class));
     }
 }

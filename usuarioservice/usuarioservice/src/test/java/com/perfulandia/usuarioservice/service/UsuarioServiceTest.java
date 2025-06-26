@@ -3,6 +3,7 @@ package com.perfulandia.usuarioservice.service;
 import com.perfulandia.usuarioservice.model.Usuario;
 import com.perfulandia.usuarioservice.repository.UsuarioRepository;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -33,7 +34,8 @@ public class UsuarioServiceTest{
     }
 
     @Test
-    void listar_deberiaRetornarTodosLosUsuarios() {
+    @DisplayName("Test 1 - Listar todos los usuarios")
+    void listarTodosLosUsuarios() {
         List<Usuario> usuarios = Arrays.asList(usuario, new Usuario(2L, "Maria Lopez", "maria.lopez@example.com", "ADMIN"));
         when(usuarioRepository.findAll()).thenReturn(usuarios);
 
@@ -45,7 +47,8 @@ public class UsuarioServiceTest{
     }
 
     @Test
-    void guardar_deberiaGuardarNuevoUsuario() {
+    @DisplayName("Test 2 - Guardar nuevo usuario")
+    void guardarNuevoUsuario() {
         when(usuarioRepository.save(any(Usuario.class))).thenReturn(usuario);
 
         Usuario result = usuarioService.guardar(usuario);
@@ -56,7 +59,8 @@ public class UsuarioServiceTest{
     }
 
     @Test
-    void buscar_deberiaRetornarUsuarioCuandoExiste() {
+    @DisplayName("Test 3 - Buscar usuario por id")
+    void buscarUsuarioPorId() {
         when(usuarioRepository.findById(1L)).thenReturn(Optional.of(usuario));
 
         Usuario result = usuarioService.buscar(1L);
@@ -67,7 +71,8 @@ public class UsuarioServiceTest{
     }
 
     @Test
-    void buscar_deberiaRetornarNullCuandoNoExiste() {
+    @DisplayName("Test 4 - Buscar usuario por id cuando usuario NO existe")
+    void buscarCuandoUsuarioNoExiste() {
         when(usuarioRepository.findById(anyLong())).thenReturn(Optional.empty());
 
         Usuario result = usuarioService.buscar(99L);
@@ -77,7 +82,8 @@ public class UsuarioServiceTest{
     }
 
     @Test
-    void eliminar_deberiaEliminarUsuarioPorId() {
+    @DisplayName("Test 5 - Eliminar usuario por id")
+    void eliminarUsuarioPorId() {
         doNothing().when(usuarioRepository).deleteById(1L); // Para métodos void
 
         usuarioService.eliminar(1L);
