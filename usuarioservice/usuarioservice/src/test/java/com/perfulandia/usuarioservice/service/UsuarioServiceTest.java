@@ -30,7 +30,7 @@ public class UsuarioServiceTest{
 
     @BeforeEach
     void setUp() {
-        usuario = new Usuario(1L, "Juan Perez", "juan.perez@example.com", "CLIENTE"); //
+        usuario = new Usuario(1L, "Carlos Bittner", "car.bittner@duocuc.cl", "CLIENTE"); //
     }
 
     @Test
