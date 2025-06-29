@@ -1,13 +1,12 @@
 package com.perfulandia.carritoservice.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.perfulandia.carritoservice.model.Carrito;
-import com.perfulandia.carritoservice.model.CarritoItem;
+import com.perfulandia.carritoservice.model.*;
 import com.perfulandia.carritoservice.service.CarritoService;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -27,18 +26,21 @@ import static org.mockito.Mockito.doNothing;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+// Anotacion para solicitar una prueba unitaria enfocada en la capa WEB (MVC)
 @WebMvcTest(CarritoController.class)
 public class CarritoControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
 
+    // Anotacion que convierte a usuarioService en un "mock" objeto simulado
+    /*
+    Motivo de porque se ocupa @MockBean en vez de @MockitoBean es por
+    la version de Spring Boot de este microservicio
+     */
     @MockBean
 
     private CarritoService carritoService;
-
-    @Autowired
-    private ObjectMapper objectMapper;
 
     private Carrito carrito;
     private CarritoItem carritoItem;
