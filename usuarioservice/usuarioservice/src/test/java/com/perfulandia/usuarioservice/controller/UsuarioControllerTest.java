@@ -31,7 +31,6 @@ public class UsuarioControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
-    // Anotacion que convierte a usuarioService en un "mock" objeto simulado
     @MockitoBean
     private UsuarioService usuarioService;
 
