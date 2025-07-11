@@ -12,7 +12,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import org.springframework.data.domain.DomainEvents;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.http.HttpStatus;
@@ -24,9 +23,7 @@ import static org.mockito.Mockito.*;
 
 // Inicializa los mocks y @InjectMocks
 @ExtendWith(MockitoExtension.class)
-
 public class CarritoServiceTest {
-
     @Mock
     private CarritoRepository carritoRepository;
 
@@ -62,6 +59,13 @@ public class CarritoServiceTest {
                 .cantidad(2)
                 .build();
     }
+
+    /*
+    * Estructura de un test:
+    * 1.- Preparacion
+    * 2.- Ejecucion
+    * 3.- Asercion
+    * */
 
     @Test
     @DisplayName("Test 1 - Listar todos los carritos")

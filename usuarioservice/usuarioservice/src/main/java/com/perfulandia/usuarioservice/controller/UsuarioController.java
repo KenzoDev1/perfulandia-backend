@@ -65,7 +65,7 @@ public class UsuarioController {
     public EntityModel<Usuario> buscar(@PathVariable long id) {
         Usuario usuario = service.buscar(id);
         if (usuario == null) {
-            throw new RuntimeException("Usuario no encontrado con ID: " + id); // O una excepción más específica
+            throw new RuntimeException("Usuario no encontrado con ID: " + id);
         }
         return assembler.toModel(usuario);
     }
