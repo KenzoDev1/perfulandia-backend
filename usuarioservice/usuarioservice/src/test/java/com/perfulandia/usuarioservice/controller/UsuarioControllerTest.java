@@ -4,7 +4,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Autowired; // Estudiar
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -13,6 +13,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.perfulandia.usuarioservice.model.Usuario;
 import com.perfulandia.usuarioservice.service.UsuarioService;
+import com.perfulandia.usuarioservice.assemblers.UsuarioModelAssembler;
+
 
 import java.util.Arrays;
 import java.util.List;
@@ -21,11 +23,12 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.hamcrest.Matchers.is;
 
+
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 // Anotacion para solicitar una prueba unitaria enfocada en la capa WEB (MVC)
-@WebMvcTest(UsuarioController.class)
+@WebMvcTest({UsuarioController.class, UsuarioModelAssembler.class})
 public class UsuarioControllerTest {
 
     @Autowired
@@ -58,8 +61,8 @@ public class UsuarioControllerTest {
 
         mockMvc.perform(get("/api/usuarios"))
                 .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$[0].nombre", is(usuario.getNombre())));
+                .andExpect(content().contentType("application/hal+json"))
+                .andExpect(jsonPath("$._embedded.usuarios[0].nombre", is(usuario.getNombre())));
     }
 
     @Test
@@ -70,7 +73,7 @@ public class UsuarioControllerTest {
         mockMvc.perform(post("/api/usuarios")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(usuario)))
-                .andExpect(status().isOk())
+                .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.nombre", is(usuario.getNombre())));
     }
 
@@ -90,6 +93,6 @@ public class UsuarioControllerTest {
         // No se necesita mockear nada para un método void
 
         mockMvc.perform(delete("/api/usuarios/{id}", 1L))
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
     }
 }

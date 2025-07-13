@@ -3,6 +3,8 @@ package com.perfulandia.carritoservice.model;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.hateoas.server.core.Relation;
+
 import java.util.HashSet;
 import java.util.Set;
 
@@ -11,6 +13,7 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@Relation(collectionRelation = "carritos", itemRelation = "carrito")
 public class Carrito {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -20,9 +23,9 @@ public class Carrito {
     private Long usuarioId;
 
     @OneToMany(mappedBy = "carrito", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    @EqualsAndHashCode.Exclude //Se excluyen estos metodos de esta columna por un asunto de recursion infinita de hashCode()
+    @EqualsAndHashCode.Exclude
     @ToString.Exclude
-    @JsonManagedReference // Indicar que este es el lado "manejado" o principal de la relación
+    @JsonManagedReference
     private Set<CarritoItem> items = new HashSet<>();
 }
 /*

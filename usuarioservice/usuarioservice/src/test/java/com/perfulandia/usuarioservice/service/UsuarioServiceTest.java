@@ -19,7 +19,6 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class UsuarioServiceTest{
-
     @Mock
     private UsuarioRepository usuarioRepository;
 
@@ -28,9 +27,9 @@ public class UsuarioServiceTest{
 
     private Usuario usuario;
 
-    @BeforeEach
+    @BeforeEach // Ejecuta esto antes de cualquier cosa
     void setUp() {
-        usuario = new Usuario(1L, "Carlos Bittner", "car.bittner@duocuc.cl", "CLIENTE"); //
+        usuario = new Usuario(1L, "Carlos Bittner", "car.bittner@duocuc.cl", "CLIENTE");
     }
 
     @Test
@@ -42,8 +41,9 @@ public class UsuarioServiceTest{
         List<Usuario> result = usuarioService.listar();
 
         assertNotNull(result);
-        assertEquals(2, result.size());
-        verify(usuarioRepository, times(1)).findAll();
+        assertEquals(2, result.size()); // Cuenta cuantos elementos hay en la lista, que serian 2
+        verify(usuarioRepository, times(1)).findAll(); // Verifica que el metodo
+        // .findAll() de usuarioRepository fue invocado 1 vez
     }
 
     @Test

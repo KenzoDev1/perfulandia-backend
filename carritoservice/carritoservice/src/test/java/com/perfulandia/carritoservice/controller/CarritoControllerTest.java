@@ -1,5 +1,7 @@
 package com.perfulandia.carritoservice.controller;
 
+import com.perfulandia.carritoservice.assemblers.CarritoItemModelAssembler;
+import com.perfulandia.carritoservice.assemblers.CarritoModelAssembler;
 import com.perfulandia.carritoservice.model.*;
 import com.perfulandia.carritoservice.service.CarritoService;
 
@@ -27,7 +29,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 // Anotacion para solicitar una prueba unitaria enfocada en la capa WEB (MVC)
-@WebMvcTest(CarritoController.class)
+@WebMvcTest({CarritoController.class, CarritoModelAssembler.class, CarritoItemModelAssembler.class})
 public class CarritoControllerTest {
 
     @Autowired
@@ -60,8 +62,8 @@ public class CarritoControllerTest {
 
         mockMvc.perform(get("/api/carritos"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(1)))
-                .andExpect(jsonPath("$[0].id", is(1)));
+                .andExpect(jsonPath("$._embedded.carritos", hasSize(1)))
+                .andExpect(jsonPath("$._embedded.carritos[0].id", is(1)));
     }
 
     @Test
@@ -77,7 +79,7 @@ public class CarritoControllerTest {
     @Test
     @DisplayName("Test 3 - Debería devolver Not Found si el carrito no existe")
     void buscarCarritoPorIdNoExistenteTest() throws Exception {
-        given(carritoService.buscarCarritoPorId(anyLong())).willReturn(Optional.empty());
+        given(carritoService.buscarCarritoPorId(anyLong())).willThrow(new RuntimeException());
 
         mockMvc.perform(get("/api/carritos/{id}", 99L))
                 .andExpect(status().isNotFound());

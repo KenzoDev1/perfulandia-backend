@@ -9,7 +9,11 @@ import org.springframework.stereotype.Component;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
-
+/*
+ * Este ensamblador convierte un objeto Carrito en un EntityModel<Carrito>.
+ * Agrega un enlace "self" al carrito individual, permitiendo acceder directamente a los detalles de ese carrito específico (GET /api/carritos/{id}).
+ * También incluye un enlace "carritos" para volver a la lista completa de carritos (GET /api/carritos).
+ */
 @Component
 public class CarritoItemModelAssembler implements RepresentationModelAssembler<CarritoItem, EntityModel<CarritoItem>> {
     @Override

@@ -1,43 +1,41 @@
 package com.perfulandia.productservice.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.perfulandia.productservice.model.*;
+import com.perfulandia.productservice.assemblers.ProductoModelAssembler;
+import com.perfulandia.productservice.model.Producto;
+import com.perfulandia.productservice.model.Usuario;
 import com.perfulandia.productservice.service.ProductoService;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.Arrays;
 import java.util.List;
 
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
-
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.hasSize;
-
-@WebMvcTest(ProductoController.class)
+@WebMvcTest({ProductoController.class, ProductoModelAssembler.class})
 public class ProductoControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
 
-    @MockitoBean
+    @MockBean
     private ProductoService productoService;
 
-    @MockitoBean
+    @MockBean
     private RestTemplate restTemplate;
 
     @Autowired
@@ -60,8 +58,9 @@ public class ProductoControllerTest {
 
         mockMvc.perform(get("/api/productos"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(2)))
-                .andExpect(jsonPath("$[0].nombre", is(producto.getNombre())));
+                .andExpect(content().contentType("application/hal+json"))
+                .andExpect(jsonPath("$._embedded.productos", hasSize(2)))
+                .andExpect(jsonPath("$._embedded.productos[0].nombre", is(producto.getNombre())));
     }
 
     @Test
@@ -72,7 +71,7 @@ public class ProductoControllerTest {
         mockMvc.perform(post("/api/productos")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(producto)))
-                .andExpect(status().isOk())
+                .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.nombre", is(producto.getNombre())));
     }
 
@@ -93,7 +92,7 @@ public class ProductoControllerTest {
         doNothing().when(productoService).eliminar(1L);
 
         mockMvc.perform(delete("/api/productos/{id}", 1L))
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
     }
 
     @Test
