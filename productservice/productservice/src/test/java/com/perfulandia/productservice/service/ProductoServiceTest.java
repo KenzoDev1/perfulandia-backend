@@ -1,5 +1,6 @@
 package com.perfulandia.productservice.service;
 
+import com.perfulandia.productservice.exception.ResourceNotFoundException;
 import com.perfulandia.productservice.model.Producto;
 import com.perfulandia.productservice.repository.ProductoRepository;
 
@@ -32,19 +33,19 @@ public class ProductoServiceTest {
 
     @BeforeEach
     void setUp() {
-        producto = new Producto(1L, "Perfume Prueba", 100, 50);
+        producto = new Producto(1L, "Halloween Man", 35000, 50);
     }
 
     @Test
     @DisplayName("Test 1 - Listar los productos")
     void listarTodosLosProductos() {
-        List<Producto> productos = Arrays.asList(producto, new Producto(2L, "Perfume B", 75, 30));
+        List<Producto> productos = Arrays.asList(producto, new Producto(2L, "Halloween Man X", 40000, 30));
         when(productoRepository.findAll()).thenReturn(productos);
 
-        List<Producto> result = productoService.listar();
+        List<Producto> resultado = productoService.listar();
 
-        assertNotNull(result);
-        assertEquals(2, result.size());
+        assertNotNull(resultado);
+        assertEquals(2, resultado.size());
         verify(productoRepository, times(1)).findAll();
     }
 
@@ -53,40 +54,41 @@ public class ProductoServiceTest {
     void guardarNuevoProducto() {
         when(productoRepository.save(any(Producto.class))).thenReturn(producto);
 
-        Producto result = productoService.guardar(producto);
+        Producto resultado = productoService.guardar(producto);
 
-        assertNotNull(result);
-        assertEquals(producto.getNombre(), result.getNombre());
+        assertNotNull(resultado);
+        assertEquals(producto.getNombre(), resultado.getNombre());
         verify(productoRepository, times(1)).save(producto);
     }
 
     @Test
     @DisplayName("Test 3 - Buscar producto por id")
-    void bucarPorId() {
-        when(productoRepository.findById(1L)).thenReturn(Optional.of(producto));
+    void buscarPorId() {
+        when(productoRepository.findById(producto.getId())).thenReturn(Optional.of(producto));
 
-        Producto result = productoService.bucarPorId(1L);
+        Producto resultado = productoService.buscarPorId(producto.getId());
 
-        assertNotNull(result);
-        assertEquals(producto.getId(), result.getId());
-        verify(productoRepository, times(1)).findById(1L);
+        assertNotNull(resultado);
+        assertEquals(producto.getId(), resultado.getId());
+        verify(productoRepository, times(1)).findById(producto.getId());
     }
 
     @Test
-    @DisplayName("Test 4 - Buscar producto por id, deberia retornar null cuando NO existe")
-    void bucarPorIdDeberiaRetornarNullCuandoNoExiste() {
+    @DisplayName("Test 4 - Buscar producto por id cuando producto NO existe")
+    void buscarPorIdDeberiaRetornarNullCuandoNoExiste() {
         when(productoRepository.findById(anyLong())).thenReturn(Optional.empty());
 
-        Producto result = productoService.bucarPorId(99L);
+        Exception exception = assertThrows(ResourceNotFoundException.class, () -> productoService.buscarPorId(producto.getId()));
 
-        assertNull(result);
-        verify(productoRepository, times(1)).findById(99L);
+        assertTrue(exception.getMessage().contains("Producto no encontrado con ID: " + producto.getId()));
+        verify(productoRepository, times(1)).findById(producto.getId());
     }
 
     @Test
     @DisplayName("Test 5 - Eliminar producto por id")
     void eliminarProductoPorId() {
-        doNothing().when(productoRepository).deleteById(1L); // Para métodos void
+        when(productoRepository.existsById(anyLong())).thenReturn(true);
+        doNothing().when(productoRepository).deleteById(1L);
 
         productoService.eliminar(1L);
 

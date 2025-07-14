@@ -1,5 +1,7 @@
 package com.perfulandia.usuarioservice.service;
 
+import com.perfulandia.usuarioservice.exception.ResourceNotFoundException;
+
 import com.perfulandia.usuarioservice.model.Usuario;
 import com.perfulandia.usuarioservice.repository.UsuarioRepository;
 import org.springframework.stereotype.Service;
@@ -8,8 +10,9 @@ import java.util.List;
 
 @Service
 public class UsuarioService {
+
     private final UsuarioRepository repo;
-    //Constructor para poder consumir la interfaz
+
     public UsuarioService(UsuarioRepository repo){
         this.repo=repo;
     }
@@ -23,10 +26,14 @@ public class UsuarioService {
     }
     //Buscar por id
     public Usuario buscar(long id){
-        return repo.findById(id).orElse(null);
+        return repo.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado con ID: " + id));
     }
-    //Eliminar id
+    //Eliminar por id
     public void eliminar(long id){
+        if (!repo.existsById(id)) {
+            throw new ResourceNotFoundException("No se puede eliminar. Usuario no encontrado con ID: " + id);
+        }
         repo.deleteById(id);
     }
 }

@@ -1,11 +1,14 @@
 package com.perfulandia.usuarioservice.service;
 
+import com.perfulandia.usuarioservice.exception.ResourceNotFoundException;
 import com.perfulandia.usuarioservice.model.Usuario;
 import com.perfulandia.usuarioservice.repository.UsuarioRepository;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -27,7 +30,7 @@ public class UsuarioServiceTest{
 
     private Usuario usuario;
 
-    @BeforeEach // Ejecuta esto antes de cualquier cosa
+    @BeforeEach
     void setUp() {
         usuario = new Usuario(1L, "Carlos Bittner", "car.bittner@duocuc.cl", "CLIENTE");
     }
@@ -35,15 +38,14 @@ public class UsuarioServiceTest{
     @Test
     @DisplayName("Test 1 - Listar todos los usuarios")
     void listarTodosLosUsuarios() {
-        List<Usuario> usuarios = Arrays.asList(usuario, new Usuario(2L, "Maria Lopez", "maria.lopez@example.com", "ADMIN"));
+        List<Usuario> usuarios = Arrays.asList(usuario, new Usuario(2L, "Benjamin Martinez", "benjamin@duocuc.cl", "ADMIN"));
         when(usuarioRepository.findAll()).thenReturn(usuarios);
 
-        List<Usuario> result = usuarioService.listar();
+        List<Usuario> resultado = usuarioService.listar();
 
-        assertNotNull(result);
-        assertEquals(2, result.size()); // Cuenta cuantos elementos hay en la lista, que serian 2
-        verify(usuarioRepository, times(1)).findAll(); // Verifica que el metodo
-        // .findAll() de usuarioRepository fue invocado 1 vez
+        assertNotNull(resultado);
+        assertEquals(2, resultado.size());
+        verify(usuarioRepository, times(1)).findAll();
     }
 
     @Test
@@ -51,40 +53,41 @@ public class UsuarioServiceTest{
     void guardarNuevoUsuario() {
         when(usuarioRepository.save(any(Usuario.class))).thenReturn(usuario);
 
-        Usuario result = usuarioService.guardar(usuario);
+        Usuario resultado = usuarioService.guardar(usuario);
 
-        assertNotNull(result);
-        assertEquals(usuario.getNombre(), result.getNombre());
+        assertNotNull(resultado);
+        assertEquals(usuario.getNombre(), resultado.getNombre());
         verify(usuarioRepository, times(1)).save(usuario);
     }
 
     @Test
     @DisplayName("Test 3 - Buscar usuario por id")
     void buscarUsuarioPorId() {
-        when(usuarioRepository.findById(1L)).thenReturn(Optional.of(usuario));
+        when(usuarioRepository.findById(usuario.getId())).thenReturn(Optional.of(usuario));
 
-        Usuario result = usuarioService.buscar(1L);
+        Usuario resultado = usuarioService.buscar(usuario.getId());
 
-        assertNotNull(result);
-        assertEquals(usuario.getId(), result.getId());
-        verify(usuarioRepository, times(1)).findById(1L);
+        assertNotNull(resultado);
+        assertEquals(usuario.getId(), resultado.getId());
+        verify(usuarioRepository, times(1)).findById(usuario.getId());
     }
 
     @Test
     @DisplayName("Test 4 - Buscar usuario por id cuando usuario NO existe")
-    void buscarCuandoUsuarioNoExiste() {
+    void buscarUsuarioCuandoNoExiste() {
         when(usuarioRepository.findById(anyLong())).thenReturn(Optional.empty());
 
-        Usuario result = usuarioService.buscar(99L);
+        Exception exception = assertThrows(ResourceNotFoundException.class,  () -> usuarioService.buscar(usuario.getId()));
 
-        assertNull(result);
-        verify(usuarioRepository, times(1)).findById(99L);
+        assertTrue(exception.getMessage().contains("Usuario no encontrado con ID: "+usuario.getId()));
+        verify(usuarioRepository, times(1)).findById(usuario.getId());
     }
 
     @Test
     @DisplayName("Test 5 - Eliminar usuario por id")
     void eliminarUsuarioPorId() {
-        doNothing().when(usuarioRepository).deleteById(1L); // Para métodos void
+        when(usuarioRepository.existsById(anyLong())).thenReturn(true);
+        doNothing().when(usuarioRepository).deleteById(1L);
 
         usuarioService.eliminar(1L);
 

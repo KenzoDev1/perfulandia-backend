@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -64,9 +65,6 @@ public class UsuarioController {
     @GetMapping("/{id}")
     public EntityModel<Usuario> buscar(@PathVariable long id) {
         Usuario usuario = service.buscar(id);
-        if (usuario == null) {
-            throw new RuntimeException("Usuario no encontrado con ID: " + id);
-        }
         return assembler.toModel(usuario);
     }
 
