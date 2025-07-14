@@ -5,6 +5,7 @@ import com.perfulandia.carritoservice.model.*;
 import com.perfulandia.carritoservice.repository.*;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.HttpClientErrorException;
@@ -32,52 +33,49 @@ public class CarritoService {
     }
 
     public Carrito buscarCarritoPorId(Long id) {
-        return carritoRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Carrito no encontrado con ID: " + id));
+        return carritoRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Carrito no encontrado con ID: " + id));
     }
 
     @Transactional
     public void eliminarCarrito(Long id) {
+        if (!carritoRepository.existsById(id)) {
+            throw new ResourceNotFoundException("No se puede eliminar. Carrito no encontrado con ID: " + id);
+        }
         carritoRepository.deleteById(id);
     }
-    private Optional<Usuario> obtenerDetallesUsuarioDesdeMS(Long usuarioId) {
+
+    private Usuario obtenerDetallesUsuarioDesdeMS(Long usuarioId) {
         try {
-            Usuario usuario = restTemplate.getForObject("http://localhost:8081/api/usuarios/" + usuarioId, Usuario.class);
-            return Optional.ofNullable(usuario);
+            return restTemplate.getForObject("http://localhost:8081/api/usuarios/" + usuarioId, Usuario.class);
         } catch (HttpClientErrorException e) {
-            // Verifica si el código de estado es 404 (Not Found)
-            if (e.getStatusCode().is4xxClientError()) {
-                return Optional.empty();
+            if(e.getStatusCode() == HttpStatus.NOT_FOUND){
+                throw new ResourceNotFoundException("No se puede operar con el usuario ID " + usuarioId + " porque no existe en el microservicio de usuarios.");
             }
-            throw e;
-        } catch (Exception e) {
-            throw new RuntimeException("No se pudo obtener el usuario con ID " + usuarioId + " desde UsuarioService. Error: " + e.getMessage());
+            throw new RuntimeException("Error al comunicarse con el servicio de usuarios: " + e.getMessage());
+        }
+        catch (Exception e) {
+            throw new RuntimeException("Error al comunicarse con el servicio de usuarios: " + e.getMessage());
         }
     }
 
-    private Optional<Producto> obtenerDetallesProductoDesdeMS(Long productoId) {
-            try {
-                Producto producto = restTemplate.getForObject("http://localhost:8082/api/productos/" + productoId, Producto.class);
-                return Optional.ofNullable(producto);
-            } catch (HttpClientErrorException e) {
-                // Verifica si el código de estado es 404 (Not Found)
-                if (e.getStatusCode().is4xxClientError()) {
-                    return Optional.empty();
-                }
-                throw e;
-            } catch (Exception e) {
-                throw new RuntimeException("No se pudo obtener el producto con ID " + productoId + " desde ProductoService. Error: " + e.getMessage());
+    private Producto obtenerDetallesProductoDesdeMS(Long productoId) {
+        try {
+            return restTemplate.getForObject("http://localhost:8082/api/productos/" + productoId, Producto.class);
+        } catch (HttpClientErrorException e) {
+            if(e.getStatusCode() == HttpStatus.NOT_FOUND){
+                throw new ResourceNotFoundException("Producto no encontrado con ID: " + productoId);
             }
+            throw new RuntimeException("Error al comunicarse con el servicio de productos: " + e.getMessage());
+        } catch (Exception e) {
+            throw new RuntimeException("Error al comunicarse con el servicio de productos: " + e.getMessage());
+        }
     }
 
     @Transactional
     public Carrito crearNuevoCarrito(Long usuarioId) {
-        // 1. Validar que el usuario exista en el microservicio de usuarios
-        Optional<Usuario> usuario = obtenerDetallesUsuarioDesdeMS(usuarioId);
-        if (usuario.isEmpty()) {
-            throw new RuntimeException("No se puede crear un carrito para el usuario con ID " + usuarioId + " porque no existe.");
-        }
+        obtenerDetallesUsuarioDesdeMS(usuarioId);
 
-        // 2. Si el usuario existe, proceder a crear el carrito
         Carrito carrito = new Carrito();
         carrito.setUsuarioId(usuarioId);
         return carritoRepository.save(carrito);
@@ -85,88 +83,69 @@ public class CarritoService {
 
     @Transactional
     public CarritoItem agregarProductoAlCarrito(Long carritoId, Long productoId, Integer cantidad) {
-        Carrito carrito = carritoRepository.findById(carritoId)
-                .orElseThrow(() -> new RuntimeException("Carrito no encontrado con ID: " + carritoId));
-
         if (cantidad <= 0) {
-            throw new IllegalArgumentException("La cantidad a agregar debe ser mayor que cero.");
+            throw new IllegalArgumentException("La cantidad debe ser un número positivo.");
         }
 
-        // Obtener detalles del producto para validar stock
-        Optional<Producto> productoOptional = obtenerDetallesProductoDesdeMS(productoId);
-        Producto productoDetalles = productoOptional.orElseThrow(() -> new RuntimeException("Producto no encontrado con ID: " + productoId));
+        Carrito carrito = buscarCarritoPorId(carritoId);
+        Producto productoDetalles = obtenerDetallesProductoDesdeMS(productoId);
 
-        //Verifica que la cantidad sea menor al stock del producto
         if (productoDetalles.getStock() < cantidad) {
-            throw new RuntimeException("Stock insuficiente para el producto: " + productoDetalles.getNombre() + ". Stock disponible: " + productoDetalles.getStock());
+            throw new IllegalArgumentException("Stock insuficiente para el producto: " + productoDetalles.getNombre() + ". Stock disponible: " + productoDetalles.getStock());
         }
 
-        //.getItems: Obtiene todos los objetos de tipo carrito
-        //.stream: es la tuberia donde se procesaran ciertas restricciones antes de dar un resultado
-        //.filter(): es el filtro que se realizara en la tuberia, segun la restriccion dentro del parentesis
-        //.findFirst(): la funcion se detendra apenas encuentre el primer elemento
-        Optional<CarritoItem> CarritoItemOptional = carrito.getItems().stream()
+        Optional<CarritoItem> carritoItemOptional = carrito.getItems().stream()
                 .filter(item -> item.getProductoId().equals(productoId))
                 .findFirst();
 
         CarritoItem carritoItemResultado;
-
-        if (CarritoItemOptional.isPresent()) {
-            CarritoItem carritoItem = CarritoItemOptional.get();
-            carritoItem.setCantidad(carritoItem.getCantidad()+cantidad);
-            carritoItemResultado = carritoItemRepository.save(carritoItem);
-            carrito.getItems().add(carritoItemResultado);
+        if (carritoItemOptional.isPresent()) {
+            CarritoItem itemExistente = carritoItemOptional.get();
+            itemExistente.setCantidad(itemExistente.getCantidad() + cantidad);
+            carritoItemResultado = carritoItemRepository.save(itemExistente);
         } else {
-            CarritoItem carritoItem = CarritoItem.builder()
+            CarritoItem nuevoItem = CarritoItem.builder()
                     .productoId(productoId)
                     .cantidad(cantidad)
                     .carrito(carrito)
                     .build();
-            carrito.getItems().add(carritoItem);
-            carritoItemResultado = carritoItemRepository.save(carritoItem);
-            carrito.getItems().add(carritoItemResultado);
+            carrito.getItems().add(nuevoItem);
+            carritoItemResultado = carritoItemRepository.save(nuevoItem);
         }
-
         return carritoItemResultado;
     }
 
     @Transactional
     public Carrito eliminarProductoDelCarrito(Long carritoId, Long productoId, Integer cantidad) {
-        Carrito carrito = carritoRepository.findById(carritoId)
-                .orElseThrow(() -> new RuntimeException("Carrito no encontrado con ID: " + carritoId));
-
         if (cantidad <= 0) {
             throw new IllegalArgumentException("La cantidad a eliminar debe ser mayor que cero.");
         }
 
-        Optional<CarritoItem> existingItem = carrito.getItems().stream()
-                .filter(item -> item.getProductoId().equals(productoId))
-                .findFirst();
+        Carrito carrito = buscarCarritoPorId(carritoId);
 
-        if (existingItem.isPresent()) {
-            CarritoItem item = existingItem.get();
-            if (item.getCantidad() <= cantidad) {
-                carrito.getItems().remove(item);
-                carritoItemRepository.delete(item);
-            } else {
-                item.setCantidad(item.getCantidad() - cantidad);
-                carritoItemRepository.save(item);
-            }
-            return carritoRepository.save(carrito);
+        CarritoItem item = carrito.getItems().stream()
+                .filter(i -> i.getProductoId().equals(productoId))
+                .findFirst()
+                .orElseThrow(() -> new ResourceNotFoundException("Producto con ID " + productoId + " no encontrado en el carrito."));
+
+        if (item.getCantidad() <= cantidad) {
+            carrito.getItems().remove(item);
+            carritoItemRepository.delete(item);
         } else {
-            throw new RuntimeException("El producto con ID " + productoId + " no se encontró en el carrito.");
+            item.setCantidad(item.getCantidad() - cantidad);
+            carritoItemRepository.save(item);
         }
+        return carritoRepository.save(carrito);
     }
 
     @Transactional
-    public Carrito eliminarProductoCompletoDelCarrito(Long carritoId, Long productId) {
-        Carrito carrito = carritoRepository.findById(carritoId)
-                .orElseThrow(() -> new RuntimeException("Carrito no encontrado con ID: " + carritoId));
+    public Carrito eliminarProductoCompletoDelCarrito(Long carritoId, Long productoId) {
+        Carrito carrito = buscarCarritoPorId(carritoId);
 
         CarritoItem itemToRemove = carrito.getItems().stream()
-                .filter(item -> item.getProductoId().equals(productId))
+                .filter(item -> item.getProductoId().equals(productoId))
                 .findFirst()
-                .orElseThrow(() -> new RuntimeException("Producto con ID " + productId + " no encontrado en el carrito."));
+                .orElseThrow(() -> new ResourceNotFoundException("Producto con ID " + productoId + " no encontrado en el carrito."));
 
         carrito.getItems().remove(itemToRemove);
         carritoItemRepository.delete(itemToRemove);
@@ -176,9 +155,7 @@ public class CarritoService {
 
     @Transactional
     public Carrito vaciarCarrito(Long carritoId) {
-        Carrito carrito = carritoRepository.findById(carritoId)
-                .orElseThrow(() -> new RuntimeException("Carrito no encontrado con ID: " + carritoId));
-
+        Carrito carrito = buscarCarritoPorId(carritoId);
         carrito.getItems().clear();
         return carritoRepository.save(carrito);
     }
