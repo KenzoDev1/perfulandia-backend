@@ -55,29 +55,28 @@ public class CarritoController {
     })
     @GetMapping("/{id}")
     public EntityModel<Carrito> buscarCarritoPorId(@PathVariable Long id) {
-        Carrito carrito = carritoService.buscarCarritoPorId(id)
-                .orElseThrow(() -> new RuntimeException("Carrito no encontrado con ID: " + id));
+        Carrito carrito = carritoService.buscarCarritoPorId(id);
         return carritoAssembler.toModel(carrito);
     }
 
     @Operation(summary = "Crear un nuevo carrito para un usuario específico")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Carrito creado exitosamente"),
-            @ApiResponse(responseCode = "400", description = "ID de usuario inválido o usuario no existente")
+            @ApiResponse(responseCode = "404", description = "El usuario especificado no existe")
     })
     @PostMapping("/usuario/{usuarioId}")
     public ResponseEntity<?> crearCarritoParaUsuario(@PathVariable Long usuarioId) {
-        EntityModel<Carrito> entityModel = carritoAssembler.toModel(carritoService.crearNuevoCarrito(usuarioId));
+        Carrito nuevoCarrito = carritoService.crearNuevoCarrito(usuarioId);
+        EntityModel<Carrito> entityModel = carritoAssembler.toModel(nuevoCarrito);
         return ResponseEntity
                 .created(entityModel.getRequiredLink(IanaLinkRelations.SELF).toUri())
                 .body(entityModel);
     }
 
-
     @Operation(summary = "Agregar un producto a un carrito")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Producto agregado/actualizado en el carrito"),
-            @ApiResponse(responseCode = "400", description = "Datos de producto o cantidad inválidos"),
+            @ApiResponse(responseCode = "400", description = "Datos de producto o cantidad inválidos (ej. stock insuficiente)"),
             @ApiResponse(responseCode = "404", description = "Carrito o Producto no encontrado")
     })
     @PostMapping("/{carritoId}/items")
@@ -92,7 +91,7 @@ public class CarritoController {
     @Operation(summary = "Eliminar una cantidad específica de un producto del carrito")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Cantidad del producto eliminada exitosamente"),
-            @ApiResponse(responseCode = "400", description = "Datos de producto o cantidad inválidos"),
+            @ApiResponse(responseCode = "400", description = "Cantidad a eliminar inválida"),
             @ApiResponse(responseCode = "404", description = "Carrito o producto en el carrito no encontrado")
     })
     @DeleteMapping("/{carritoId}/items")
@@ -107,7 +106,7 @@ public class CarritoController {
     @Operation(summary = "Eliminar completamente un producto del carrito")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Producto eliminado completamente del carrito"),
-            @ApiResponse(responseCode = "404", description = "Carrito o producto no encontrado")
+            @ApiResponse(responseCode = "404", description = "Carrito o producto en el carrito no encontrado")
     })
     @DeleteMapping("/{carritoId}/productos/{productoId}")
     public ResponseEntity<EntityModel<Carrito>> eliminarProductoCompletoDelCarrito(
@@ -116,7 +115,6 @@ public class CarritoController {
         Carrito carritoActualizado = carritoService.eliminarProductoCompletoDelCarrito(carritoId, productoId);
         return ResponseEntity.ok(carritoAssembler.toModel(carritoActualizado));
     }
-
 
     @Operation(summary = "Vaciar completamente un carrito")
     @ApiResponses(value = {
@@ -140,5 +138,6 @@ public class CarritoController {
         return ResponseEntity.noContent().build();
     }
 }
+
 
 // Link para meterse a swagger "http://localhost:8083/swagger-ui/index.html"
