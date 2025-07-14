@@ -55,8 +55,7 @@ public class CarritoController {
     })
     @GetMapping("/{id}")
     public EntityModel<Carrito> buscarCarritoPorId(@PathVariable Long id) {
-        Carrito carrito = carritoService.buscarCarritoPorId(id)
-                .orElseThrow(() -> new RuntimeException("Carrito no encontrado con ID: " + id));
+        Carrito carrito = carritoService.buscarCarritoPorId(id);
         return carritoAssembler.toModel(carrito);
     }
 

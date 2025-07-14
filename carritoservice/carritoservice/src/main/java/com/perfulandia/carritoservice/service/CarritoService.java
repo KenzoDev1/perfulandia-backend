@@ -1,5 +1,6 @@
 package com.perfulandia.carritoservice.service;
 
+import com.perfulandia.carritoservice.exception.ResourceNotFoundException;
 import com.perfulandia.carritoservice.model.*;
 import com.perfulandia.carritoservice.repository.*;
 
@@ -17,7 +18,7 @@ public class CarritoService {
 
     private final CarritoRepository carritoRepository;
     private final CarritoItemRepository carritoItemRepository;
-    private final RestTemplate restTemplate; // Para comunicarse con ProductoService y UsuarioService
+    private final RestTemplate restTemplate;
 
     @Autowired
     public CarritoService(CarritoRepository carritoRepository, CarritoItemRepository carritoItemRepository, RestTemplate restTemplate) {
@@ -26,32 +27,18 @@ public class CarritoService {
         this.restTemplate = restTemplate;
     }
 
-    // Listar todos los carritos
     public List<Carrito> listarTodosLosCarritos() {
         return carritoRepository.findAll();
     }
 
-    // Buscar carrito por id
-    public Optional<Carrito> buscarCarritoPorId(Long id) {
-        return carritoRepository.findById(id);
+    public Carrito buscarCarritoPorId(Long id) {
+        return carritoRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Carrito no encontrado con ID: " + id));
     }
 
-    /* "Guardar carrito" tuvo que crearse manualmente, en vez de utilizar su metodo
-    * CRUD de JpaRepository porque necesitaba verificar en el atributo usuarioId exista */
-
-    // Eliminar carrito
     @Transactional
     public void eliminarCarrito(Long id) {
         carritoRepository.deleteById(id);
     }
-
-    /**
-     * Obtiene los detalles de un usuario desde el UsuarioService.
-     * Este es el nuevo método para validar el usuario.'
-     * @param usuarioId ID del usuario.
-     * @return Objeto Usuario (DTO) con sus detalles, o null si no existe.
-     * @throws RuntimeException si hay un error de comunicación con el UsuarioService.
-     */
     private Optional<Usuario> obtenerDetallesUsuarioDesdeMS(Long usuarioId) {
         try {
             Usuario usuario = restTemplate.getForObject("http://localhost:8081/api/usuarios/" + usuarioId, Usuario.class);
@@ -67,12 +54,6 @@ public class CarritoService {
         }
     }
 
-    /**
-     * Obtiene los detalles de un producto desde el ProductoService.
-     * @param productoId ID del producto.
-     * @return Objeto Producto (DTO) con sus detalles actualizados.
-     * @throws RuntimeException si el producto no es encontrado.
-     */
     private Optional<Producto> obtenerDetallesProductoDesdeMS(Long productoId) {
             try {
                 Producto producto = restTemplate.getForObject("http://localhost:8082/api/productos/" + productoId, Producto.class);
@@ -88,12 +69,6 @@ public class CarritoService {
             }
     }
 
-    /**
-     * Crea un nuevo carrito para un usuario dado, validando que el usuario exista.
-     * @param usuarioId ID del usuario.
-     * @return El carrito recién creado.
-     * @throws RuntimeException si el usuario no es encontrado.
-     */
     @Transactional
     public Carrito crearNuevoCarrito(Long usuarioId) {
         // 1. Validar que el usuario exista en el microservicio de usuarios
@@ -108,15 +83,6 @@ public class CarritoService {
         return carritoRepository.save(carrito);
     }
 
-    /**
-     * Agrega un producto al carrito o actualiza su cantidad si ya existe.
-     * El precio y nombre del producto se obtienen en tiempo real del ProductoService.
-     * @param carritoId ID del carrito al que se agregará el producto.
-     * @param productoId ID del producto a agregar.
-     * @param cantidad Cantidad a agregar.
-     * @return El carrito actualizado.
-     * @throws RuntimeException si el carrito o producto no se encuentran, o si el stock es insuficiente.
-     */
     @Transactional
     public CarritoItem agregarProductoAlCarrito(Long carritoId, Long productoId, Integer cantidad) {
         Carrito carrito = carritoRepository.findById(carritoId)
