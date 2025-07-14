@@ -41,7 +41,6 @@ public class CarritoControllerTest {
     la version de Spring Boot de este microservicio
      */
     @MockBean
-
     private CarritoService carritoService;
 
     private Carrito carrito;

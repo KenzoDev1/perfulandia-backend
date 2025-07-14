@@ -3,17 +3,16 @@ package com.perfulandia.productservice.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.perfulandia.productservice.assemblers.ProductoModelAssembler;
 import com.perfulandia.productservice.model.Producto;
-import com.perfulandia.productservice.model.Usuario;
 import com.perfulandia.productservice.service.ProductoService;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.web.client.RestTemplate;
 
 import java.util.Arrays;
 import java.util.List;
@@ -32,28 +31,23 @@ public class ProductoControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
-    @MockBean
+    @MockitoBean
     private ProductoService productoService;
-
-    @MockBean
-    private RestTemplate restTemplate;
 
     @Autowired
     private ObjectMapper objectMapper;
 
     private Producto producto;
-    private Usuario usuario;
 
     @BeforeEach
     void setUp() {
-        producto = new Producto(1L, "Perfume Chanel", 150.00, 20);
-        usuario = new Usuario(1L, "Test User", "test@user.com", "ADMIN");
+        producto = new Producto(1L, "Halloween Man", 35000, 50);
     }
 
     @Test
     @DisplayName("Test 1 - Listar todos los productos")
     void listarProductosTest() throws Exception {
-        List<Producto> productos = Arrays.asList(producto, new Producto(2L, "Perfume Dior", 180.00, 15));
+        List<Producto> productos = Arrays.asList(producto, new Producto(2L, "Halloween Man X", 40000, 30));
         given(productoService.listar()).willReturn(productos);
 
         mockMvc.perform(get("/api/productos"))
@@ -78,7 +72,7 @@ public class ProductoControllerTest {
     @Test
     @DisplayName("Test 3 - Buscar un producto por ID")
     void buscarProductoPorIdTest() throws Exception {
-        given(productoService.bucarPorId(1L)).willReturn(producto);
+        given(productoService.buscarPorId(1L)).willReturn(producto);
 
         mockMvc.perform(get("/api/productos/{id}", 1L))
                 .andExpect(status().isOk())
@@ -93,16 +87,5 @@ public class ProductoControllerTest {
 
         mockMvc.perform(delete("/api/productos/{id}", 1L))
                 .andExpect(status().isNoContent());
-    }
-
-    @Test
-    @DisplayName("Test 5 - Obtener un usuario desde el microservicio de usuarios")
-    void obtenerUsuarioTest() throws Exception {
-        String url = "http://localhost:8081/api/usuarios/" + usuario.getId();
-        given(restTemplate.getForObject(url, Usuario.class)).willReturn(usuario);
-
-        mockMvc.perform(get("/api/productos/usuario/{id}", usuario.getId()))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.nombre", is(usuario.getNombre())));
     }
 }

@@ -4,7 +4,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import org.springframework.beans.factory.annotation.Autowired; // Estudiar
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -27,7 +27,6 @@ import static org.hamcrest.Matchers.is;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-// Anotacion para solicitar una prueba unitaria enfocada en la capa WEB (MVC)
 @WebMvcTest({UsuarioController.class, UsuarioModelAssembler.class})
 public class UsuarioControllerTest {
 
@@ -37,12 +36,6 @@ public class UsuarioControllerTest {
     @MockitoBean
     private UsuarioService usuarioService;
 
-    /*
-    ObjectMapper es una clase fundamental de la librería Jackson,
-    que es el estándar de facto en el ecosistema de Spring para trabajar con JSON.
-    Su función principal es actuar como un traductor entre los objetos de Java y
-    su representación en formato JSON.
-     */
     @Autowired
     private ObjectMapper objectMapper;
 
@@ -55,7 +48,7 @@ public class UsuarioControllerTest {
 
     @Test
     @DisplayName("Test 1 - Debería listar todos los usuarios")
-    void listarUsuariosTest() throws Exception {
+    void listarUsuarios() throws Exception {
         List<Usuario> usuarios = Arrays.asList(usuario);
         given(usuarioService.listar()).willReturn(usuarios);
 
@@ -67,19 +60,19 @@ public class UsuarioControllerTest {
 
     @Test
     @DisplayName("Test 2 - Debería guardar un nuevo usuario")
-    void guardarUsuarioTest() throws Exception {
+    void guardarUsuario() throws Exception {
         given(usuarioService.guardar(any(Usuario.class))).willReturn(usuario);
 
         mockMvc.perform(post("/api/usuarios")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(usuario)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.nombre", is(usuario.getNombre())));
+                .andExpect(jsonPath("$.nombre", is(usuario.getNombre()))); //
     }
 
     @Test
     @DisplayName("Test 3 - debería buscar un usuario por ID")
-    void buscarUsuarioPorIdTest() throws Exception {
+    void buscarUsuarioPorId() throws Exception {
         given(usuarioService.buscar(1L)).willReturn(usuario);
 
         mockMvc.perform(get("/api/usuarios/{id}", 1L))
@@ -89,9 +82,7 @@ public class UsuarioControllerTest {
 
     @Test
     @DisplayName("Test 4 - Debería eliminar un usuario por ID")
-    void eliminarUsuarioTest() throws Exception {
-        // No se necesita mockear nada para un método void
-
+    void eliminarUsuario() throws Exception {
         mockMvc.perform(delete("/api/usuarios/{id}", 1L))
                 .andExpect(status().isNoContent());
     }
